@@ -1,0 +1,69 @@
+#!/usr/bin/python2.7
+
+import argparse
+import os
+import sys
+import subprocess
+import textwrap
+
+def main():
+
+    # Redefine the exception handling routine so that it does NOT
+    # do a trace dump if the user types ^C while lsseq is running.
+    #
+    old_excepthook = sys.excepthook
+    def new_hook(exceptionType, value, traceback):
+        if exceptionType != KeyboardInterrupt and exceptionType != IOError:
+            old_excepthook(exceptionType, value, traceback)
+        else:
+            pass
+    sys.excepthook = new_hook
+
+    p = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent('''\
+            Print table of powers of 2 up to n of integers 2 up to m.
+            '''),
+        usage="%(prog)s [OPTION]... [FILE]...")
+
+    p.add_argument("--version", action="version", version="0.100")
+    p.add_argument("--power", "-n", action="store", type=int, dest="n",
+        default=3, metavar="N", help="The highest power in the table will be N.")
+    p.add_argument("--max", "-m", action="store", type=int, dest="m",
+        default=20, metavar="M", help="Print the powers from 2 to M.")
+
+    p.add_argument("files", metavar="FILE", nargs="*",
+        help="file names")
+
+    args = p.parse_args()
+
+    if args.n < 2 :
+        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
+            ": error: the maximum power must be greater than one."
+        sys.exit(0)
+
+    if args.m < 2 :
+        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
+            ": error: The maximum integer M to calculate powers for must be greater than one."
+        sys.exit(0)
+
+    formatList = [0, 0]
+    n = 2
+    while n <= args.n :
+        print pow(args.m, n)
+        formatList.append(len(str(pow(args.m, n))))
+        n += 1
+
+    print formatList 
+    sys.exit()
+
+    m = 2
+    while m <= args.m :
+        n = 2
+        while n <= args.n :
+            print str(m) + "^" + str(n) + " = " + str(pow(m, n))
+            n += 1
+        m += 1
+        
+if __name__ == '__main__':
+    main()
