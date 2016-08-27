@@ -35,18 +35,26 @@ def main():
     p.add_argument("--primes", action="store_true",
         dest="onlyPrimes", default=False,
         help="only print out powers of primes" )
+    p.add_argument("--limit", action="store", type=int, dest="maxDigits",
+        default=-1, metavar="MAX", help="Limit printing powers to numbers of length MAX-digits or less")
 
     args = p.parse_args()
 
     if args.n < 2 :
         print >> sys.stderr, os.path.basename(sys.argv[0]) + \
             ": error: the maximum power must be greater than one."
-        sys.exit(0)
+        sys.exit(1)
 
     if args.m < 2 :
         print >> sys.stderr, os.path.basename(sys.argv[0]) + \
             ": error: The maximum integer M to calculate powers for must be greater than one."
+        sys.exit(1)
+
+    if args.maxDigits == 0 :
+        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
+            ": warning: max digits is 0, nothing to print."
         sys.exit(0)
+
 
     # Note: this "isPrime" array will be filled with True 
     # in the case that we want to display ALL the integers
@@ -78,25 +86,53 @@ def main():
 	while not isPrime[i] : 
 	    i -= 1
 	maxM = i
+    maxN = args.n
 
     # Calculate the length of the strings of the highest powers
     # to be printed out (for formatting purposes)
     #
+    intFormat = "{:d}"
+    if args.maxDigits > 0 :
+	limitN = 2
+	limitM = 2
+	while limitN <= maxN :
+	    if len(intFormat.format(pow(2,limitN))) > args.maxDigits \
+		    or limitN == maxN :
+		break
+	    limitN += 1
+	while limitM <= maxM :
+	    if len(intFormat.format(pow(limitM,2))) > args.maxDigits \
+		    or limitM == maxM :
+		break
+	    limitM += 1
+	maxN = limitN
+	maxM = limitM
+
     outputLine = ""
     formatList = [0]
+    prettyMaxLen = -1
     n = 1
-    while n <= args.n :
-	format = "{:>,d}"
-        s = format.format(pow(maxM, n))
-	# print s
-        formatList.append(len(s))
-	format = "{:>"+ str(formatList[-1]) + ",d}"
-	outputLine += format.format(n)
+    while n <= maxN :
+	commaFormat = "{:>,d}"
+	sPretty = commaFormat.format(pow(maxM, n))
+	sInt = intFormat.format(pow(maxM, n))
+
+	if args.maxDigits > 0 :
+	    if len(sInt) <= args.maxDigits :
+		formatList.append(len(sPretty))
+		prettyMaxLen = formatList[-1]
+	    else :
+		formatList.append(prettyMaxLen)
+	else :
+	    formatList.append(len(sPretty))
+
+	commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
+	outputLine += commaFormatPad.format(n)
 	if n == 1 :
 	    outputLine += " | "
 	else :
 	    outputLine += "  "
-        n += 1
+	n += 1
 
     # Make the dividing line between list of powers 
     # and first row of powers of 2.
@@ -114,13 +150,19 @@ def main():
     # Now calculate and print the powers
     #
     m = 2
-    while m <= args.m :
-	format = "{:>"+ str(formatList[1]) + ",d}"
-	outputLine = format.format(m) + " | "
+    while m <= maxM :
+	commaFormatPad = "{:>"+ str(formatList[1]) + ",d}"
+	outputLine = commaFormatPad.format(m) + " | "
         n = 2
-        while n <= args.n :
-	    format = "{:>"+ str(formatList[n]) + ",d}"
-            outputLine += format.format(pow(m, n)) + "  "
+        while n <= maxN :
+	    commaFormatPad = "{:>"+ str(formatList[n]) + ",d}"
+	    if args.maxDigits > 0 :
+		if len(intFormat.format(pow(m, n))) <= args.maxDigits :
+		    outputLine += commaFormatPad.format(pow(m, n)) + "  "
+		else :
+		    break
+	    else :
+		outputLine += commaFormatPad.format(pow(m, n)) + "  "
             n += 1
 	if isPrime[m] :
 	    print outputLine
