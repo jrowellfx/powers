@@ -28,9 +28,9 @@ def main():
 
     p.add_argument("--version", action="version", version="0.100")
     p.add_argument("--power", "-n", action="store", type=int, dest="n",
-        default=3, metavar="N", help="The highest power in the table will be N.")
+        default=3, metavar="N", help="The highest power in the table will be N (default=3).")
     p.add_argument("--max", "-m", action="store", type=int, dest="m",
-        default=20, metavar="M", help="Print the powers from 2 to M.")
+        default=20, metavar="M", help="Print the powers from 2 to M (default=20).")
 
     p.add_argument("files", metavar="FILE", nargs="*",
         help="file names")
@@ -47,21 +47,20 @@ def main():
             ": error: The maximum integer M to calculate powers for must be greater than one."
         sys.exit(0)
 
-    formatList = [0, 0]
-    n = 2
+    formatList = [0]
+    n = 1
     while n <= args.n :
         print pow(args.m, n)
         formatList.append(len(str(pow(args.m, n))))
         n += 1
 
     print formatList 
-    sys.exit()
 
     m = 2
     while m <= args.m :
         n = 2
         while n <= args.n :
-            print str(m) + "^" + str(n) + " = " + str(pow(m, n))
+            print str(m) + "^" + str(n) + " = " + "{:>9,d}".format(pow(m, n))
             n += 1
         m += 1
         
