@@ -61,7 +61,7 @@ def main():
     # from 2,m - sorry, it's a bit of a cheat to use this list
     # this way, but it makes for clean code.
     #
-    isPrime = [True]*(args.m+1)
+    isPrime = [True]*(args.m+2)
 
     # Sieve of Eratosthenes - skipped when wanting to list ALL numbers
     #
@@ -93,34 +93,37 @@ def main():
     #
     intFormat = "{:d}"
     if args.maxDigits > 0 :
-	limitN = 2
-	limitM = 2
-	while limitN <= maxN :
-	    if len(intFormat.format(pow(2,limitN))) > args.maxDigits \
-		    or limitN == maxN :
+	n = 2
+	m = 2
+	while n < maxN :
+	    if len(intFormat.format(pow(2,n))) > args.maxDigits :
+		n -= 1
 		break
-	    limitN += 1
-	while limitM <= maxM :
-	    if len(intFormat.format(pow(limitM,2))) > args.maxDigits \
-		    or limitM == maxM :
+	    n += 1
+
+	while m < maxM :
+	    if len(intFormat.format(pow(m,2))) > args.maxDigits :
+		m -= 1
 		break
-	    limitM += 1
-	maxN = limitN
-	maxM = limitM
+	    m += 1
+
+	maxN = n
+	maxM = m
 
     outputLine = ""
     formatList = [0]
-    prettyMaxLen = -1
+    commaFormat = "{:>,d}"
+    prettyMaxLen = 0
+    if args.maxDigits > 0 :
+	prettyMaxLen = len(commaFormat.format(int("9"*args.maxDigits)))
     n = 1
     while n <= maxN :
-	commaFormat = "{:>,d}"
 	sPretty = commaFormat.format(pow(maxM, n))
 	sInt = intFormat.format(pow(maxM, n))
 
 	if args.maxDigits > 0 :
 	    if len(sInt) <= args.maxDigits :
 		formatList.append(len(sPretty))
-		prettyMaxLen = formatList[-1]
 	    else :
 		formatList.append(prettyMaxLen)
 	else :
@@ -129,6 +132,7 @@ def main():
 	commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
 	outputLine += commaFormatPad.format(n)
 	if n == 1 :
+	    outputLine = outputLine.replace("1", " ")
 	    outputLine += " | "
 	else :
 	    outputLine += "  "
