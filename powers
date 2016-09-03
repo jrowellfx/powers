@@ -95,20 +95,22 @@ def main():
     if args.maxDigits > 0 :
 	n = 2
 	m = 2
-	while n < maxN :
+	while n <= maxN :
 	    if len(intFormat.format(pow(2,n))) > args.maxDigits :
 		n -= 1
 		break
 	    n += 1
 
-	while m < maxM :
+	while m <= maxM :
 	    if len(intFormat.format(pow(m,2))) > args.maxDigits :
 		m -= 1
 		break
 	    m += 1
 
-	maxN = n
-	maxM = m
+	if n < maxN :
+	    maxN = n
+	if m < maxM :
+	    maxM = m
 
     outputLine = ""
     formatList = [0]
