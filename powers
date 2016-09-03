@@ -9,7 +9,7 @@ import textwrap
 def main():
 
     # Redefine the exception handling routine so that it does NOT
-    # do a trace dump if the user types ^C while lsseq is running.
+    # do a trace dump if the user types ^C while the command is running.
     #
     old_excepthook = sys.excepthook
     def new_hook(exceptionType, value, traceback):
@@ -36,25 +36,25 @@ def main():
         dest="onlyPrimes", default=False,
         help="only print out powers of primes" )
     p.add_argument("--limit", action="store", type=int, dest="maxDigits",
-        default=-1, metavar="MAX", help="Limit printing powers to numbers of length MAX-digits or less")
+        default=-1, metavar="MAX",
+	help="Limit printing powers to numbers of length MAX-digits or less")
 
     args = p.parse_args()
 
     if args.n < 2 :
         print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": error: the maximum power must be greater than one."
+            ": error: the maximum power (--power) must be greater than one."
         sys.exit(1)
 
     if args.m < 2 :
         print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": error: The maximum integer M to calculate powers for must be greater than one."
+            ": error: the maximum integer in the range (--max) must be greater than one."
         sys.exit(1)
 
     if args.maxDigits == 0 :
         print >> sys.stderr, os.path.basename(sys.argv[0]) + \
             ": warning: max digits is 0, nothing to print."
         sys.exit(0)
-
 
     # Note: this "isPrime" array will be filled with True 
     # in the case that we want to display ALL the integers
@@ -81,8 +81,7 @@ def main():
     if not args.onlyPrimes :
 	maxM = args.m
     else :
-	i = len(isPrime)
-	i -= 1
+	i = len(isPrime) - 1
 	while not isPrime[i] : 
 	    i -= 1
 	maxM = i
@@ -94,13 +93,13 @@ def main():
     intFormat = "{:d}"
     if args.maxDigits > 0 :
 	n = 2
-	m = 2
 	while n <= maxN :
 	    if len(intFormat.format(pow(2,n))) > args.maxDigits :
 		n -= 1
 		break
 	    n += 1
 
+	m = 2
 	while m <= maxM :
 	    if len(intFormat.format(pow(m,2))) > args.maxDigits :
 		m -= 1
