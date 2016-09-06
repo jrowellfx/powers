@@ -24,22 +24,22 @@ def main():
     p = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent('''\
-            Print table of powers of 2 up to n of integers 2 up to m.
+            Quiz the user's memory on squares and cubes, 4th powers etc.
             '''),
         usage="%(prog)s [OPTION]...")
 
     p.add_argument("--version", action="version", version="0.100")
     p.add_argument("--power", "-n", action="store", type=int, dest="n",
-        default=3, metavar="N",
-	help="The highest power in the table will be N (default=3).")
+        default=2, metavar="N",
+	help="Test the users memory of Nth powers, eg. squares are 2, cubes 3 etc. (default=2).")
     p.add_argument("--max", "-m", action="store", type=int, dest="m",
-        default=20, metavar="M", help="Print the powers from 2 to M (default=20).")
+        default=20, metavar="M", help="Test the Nth power of the integers 2 to M (default=31).")
     p.add_argument("--primes", action="store_true",
         dest="onlyPrimes", default=False,
-        help="only print out powers of primes" )
+        help="only test the Nth power of primes" )
     p.add_argument("--limit", action="store", type=int, dest="maxDigits",
         default=-1, metavar="MAX",
-	help="Limit printing powers to numbers of length MAX-digits or less")
+	help="Limit testing powers to integers of length MAX-digits or less")
 
     args = p.parse_args()
 
