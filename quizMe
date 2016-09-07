@@ -43,6 +43,21 @@ def main():
 
     args = p.parse_args()
 
+    if args.n < 2 :
+        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
+            ": error: the power (--power) must be greater than or equal to two."
+        sys.exit(1)
+
+    if args.m < 2 :
+        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
+            ": error: the range (--max) must be greater than or equal to two."
+        sys.exit(1)
+
+    if args.maxDigits == 0 :
+        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
+            ": warning: max digits is 0, nothing to print."
+        sys.exit(0)
+
     userAnswerStr = ""
     n = random.randint(2,31)
     nSquared = n * n
@@ -87,21 +102,6 @@ def main():
 	    break
 
     exit(0)
-
-    if args.n < 2 :
-        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": error: the maximum power (--power) must be greater than one."
-        sys.exit(1)
-
-    if args.m < 2 :
-        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": error: the maximum integer in the range (--max) must be greater than one."
-        sys.exit(1)
-
-    if args.maxDigits == 0 :
-        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": warning: max digits is 0, nothing to print."
-        sys.exit(0)
 
     # Note: this "isPrime" array will be filled with True 
     # in the case that we want to display ALL the integers
