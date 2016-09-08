@@ -7,8 +7,14 @@ import subprocess
 import textwrap
 import time
 import random
+from operator import itemgetter
 
 def main():
+
+    INT = 0
+    POWER = 1
+    SHUFFLE = 2
+    ASK_FOR_ROOT = 3
 
     # Redefine the exception handling routine so that it does NOT
     # do a trace dump if the user types ^C while the command is running.
@@ -33,7 +39,8 @@ def main():
         default=2, metavar="N",
 	help="Test the users memory of Nth powers, eg. squares are 2, cubes 3 etc. (default=2).")
     p.add_argument("--max", "-m", action="store", type=int, dest="m",
-        default=20, metavar="M", help="Test the Nth power of the integers 2 to M (default=31).")
+        default=31, metavar="M",
+	help="Test the Nth power of the integers 2 to M (default=31).")
     p.add_argument("--primes", action="store_true",
         dest="onlyPrimes", default=False,
         help="only test the Nth power of primes" )
@@ -45,7 +52,7 @@ def main():
 
     if args.n < 2 :
         print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": error: the power (--power) must be greater than or equal to two."
+            ": error: --power must be greater than or equal to two."
         sys.exit(1)
 
     if args.m < 2 :
@@ -59,13 +66,33 @@ def main():
         sys.exit(0)
 
     userAnswerStr = ""
-    n = random.randint(2,31)
-    nSquared = n * n
-    while True :
+    quizList = []
+    i = 2
+    while i <= args.m :
+	quizList.append((i, i * i, random.random(), True))
+	quizList.append((i, i * i, random.random(), False))
+	i += 1
+
+    quizList.sort(key=itemgetter(SHUFFLE))
+
+    i = 0
+    while i < len(quizList) :
+
+	n = quizList[i][INT]
+	nSquared = quizList[i][POWER]
+	askForRoot = quizList[i][ASK_FOR_ROOT]
+	if askForRoot :
+	    correctAnswer = n
+	else :
+	    correctAnswer = nSquared
+
 	print ""
 	startTime = time.time()
 	try :
-	    userAnswerStr = raw_input(str(n) + '^2? --> ')
+	    if askForRoot :
+		userAnswerStr = raw_input("sqrt( " + str(nSquared) + ' )? --> ')
+	    else :
+		userAnswerStr = raw_input(str(n) + '^2? --> ')
 	except EOFError :
 	    print "" 
 	    print ""
@@ -79,10 +106,9 @@ def main():
 	except ValueError :
 	    print "Value typed was not an integer"
 	else :
-	    if userAnswer == nSquared :
+	    if userAnswer == correctAnswer :
 		print "Correct"
-		n = random.randint(2,31)
-		nSquared = n * n
+		i += 1
 	    else :
 		print "Incorrect"
 		continue
