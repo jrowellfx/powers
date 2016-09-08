@@ -69,8 +69,9 @@ def main():
     quizList = []
     i = 2
     while i <= args.m :
-	quizList.append((i, i * i, random.random(), True))
-	quizList.append((i, i * i, random.random(), False))
+	x = pow(i, args.n)
+	quizList.append((i, x, random.random(), True))
+	quizList.append((i, x, random.random(), False))
 	i += 1
 
     quizList.sort(key=itemgetter(SHUFFLE))
@@ -79,20 +80,20 @@ def main():
     while i < len(quizList) :
 
 	n = quizList[i][INT]
-	nSquared = quizList[i][POWER]
+	nthPower = quizList[i][POWER]
 	askForRoot = quizList[i][ASK_FOR_ROOT]
 	if askForRoot :
 	    correctAnswer = n
 	else :
-	    correctAnswer = nSquared
+	    correctAnswer = nthPower
 
 	print ""
 	startTime = time.time()
 	try :
 	    if askForRoot :
-		userAnswerStr = raw_input("sqrt( " + str(nSquared) + ' )? --> ')
+		userAnswerStr = raw_input(str(nthPower) + '^(1/' + str(args.n) + ')? --> ')
 	    else :
-		userAnswerStr = raw_input(str(n) + '^2? --> ')
+		userAnswerStr = raw_input(str(n) + '^' + str(args.n) + '? --> ')
 	except EOFError :
 	    print "" 
 	    print ""
