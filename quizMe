@@ -12,9 +12,10 @@ from operator import itemgetter
 def main():
 
     INT = 0
-    POWER = 1
-    SHUFFLE = 2
-    ASK_FOR_ROOT = 3
+    EXP = 1
+    POWER = 2
+    SHUFFLE = 3
+    ASK_FOR_ROOT = 4
 
     # Redefine the exception handling routine so that it does NOT
     # do a trace dump if the user types ^C while the command is running.
@@ -36,8 +37,8 @@ def main():
 
     p.add_argument("--version", action="version", version="0.100")
     p.add_argument("--power", "-n", action="store", type=int, dest="n",
-        default=2, metavar="N",
-	help="Test the users memory of Nth powers, eg. squares are 2, cubes 3 etc. (default=2).")
+        default=2, nargs='+',
+	help="List powers to test user on, eg. squares are 2, cubes 3 etc. (default=2).")
     p.add_argument("--max", "-m", action="store", type=int, dest="m",
         default=31, metavar="M",
 	help="Test the Nth power of the integers 2 to M (default=31).")
@@ -50,10 +51,16 @@ def main():
 
     args = p.parse_args()
 
-    if args.n < 2 :
-        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": error: --power must be greater than or equal to two."
-        sys.exit(1)
+    if type(args.n) == int :
+        powerList = [ args.n ]
+    else :
+        powerList = args.n
+
+    for i in powerList :
+        if i < 2 :
+            print >> sys.stderr, os.path.basename(sys.argv[0]) + \
+                ": error: --power must be greater than or equal to two."
+            sys.exit(1)
 
     if args.m < 2 :
         print >> sys.stderr, os.path.basename(sys.argv[0]) + \
@@ -67,12 +74,13 @@ def main():
 
     userAnswerStr = ""
     quizList = []
-    i = 2
-    while i <= args.m :
-	x = pow(i, args.n)
-	quizList.append((i, x, random.random(), True))
-	quizList.append((i, x, random.random(), False))
-	i += 1
+    for n in powerList :
+        i = 2
+        while i <= args.m :
+            x = pow(i, n)
+            quizList.append((i, n, x, random.random(), True))
+            quizList.append((i, n, x, random.random(), False))
+            i += 1
 
     quizList.sort(key=itemgetter(SHUFFLE))
 
@@ -80,6 +88,7 @@ def main():
     while i < len(quizList) :
 
 	n = quizList[i][INT]
+	exponent = quizList[i][EXP]
 	nthPower = quizList[i][POWER]
 	askForRoot = quizList[i][ASK_FOR_ROOT]
 	if askForRoot :
@@ -91,9 +100,9 @@ def main():
 	startTime = time.time()
 	try :
 	    if askForRoot :
-		userAnswerStr = raw_input(str(nthPower) + '^(1/' + str(args.n) + ')? --> ')
+		userAnswerStr = raw_input(str(nthPower) + '^(1/' + str(exponent) + ')? --> ')
 	    else :
-		userAnswerStr = raw_input(str(n) + '^' + str(args.n) + '? --> ')
+		userAnswerStr = raw_input(str(n) + '^' + str(exponent) + '? --> ')
 	except EOFError :
 	    print "" 
 	    print ""
