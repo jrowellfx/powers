@@ -111,6 +111,11 @@ def main():
 	endTime = time.time()
 	print endTime - startTime
 
+	if userAnswerStr == 'pass' :
+	    i += 1
+	    continue
+
+
 	try :
 	    userAnswer = int(userAnswerStr)
 	except ValueError :
