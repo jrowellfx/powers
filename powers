@@ -5,8 +5,11 @@ import os
 import sys
 import subprocess
 import textwrap
+import math
 
 def main():
+
+    kEpsilon = 1.0e-14
 
     # Redefine the exception handling routine so that it does NOT
     # do a trace dump if the user types ^C while the command is running.
@@ -35,7 +38,7 @@ def main():
     p.add_argument("--primes", action="store_true",
         dest="onlyPrimes", default=False,
         help="only print out powers of primes" )
-    p.add_argument("--limit", action="store", type=int, dest="maxDigits",
+    p.add_argument("--limit", action="store", type=float, dest="maxDigits",
         default=-1, metavar="MAX",
 	help="Limit printing powers to numbers of length MAX-digits or less")
 
@@ -90,18 +93,17 @@ def main():
     # Calculate the length of the strings of the highest powers
     # to be printed out (for formatting purposes)
     #
-    intFormat = "{:d}"
     if args.maxDigits > 0 :
 	n = 2
 	while n <= maxN :
-	    if len(intFormat.format(pow(2,n))) > args.maxDigits :
+	    if math.log(pow(2,n), 10) > args.maxDigits :
 		n -= 1
 		break
 	    n += 1
 
 	m = 2
 	while m <= maxM :
-	    if len(intFormat.format(pow(m,2))) > args.maxDigits :
+	    if math.log(pow(m,2), 10) > args.maxDigits :
 		m -= 1
 		break
 	    m += 1
@@ -116,15 +118,14 @@ def main():
     commaFormat = "{:>,d}"
     prettyMaxLen = 0
     if args.maxDigits > 0 :
-	prettyMaxLen = len(commaFormat.format(int("9"*args.maxDigits)))
+	prettyMaxLen = len(commaFormat.format(int("9"*int(math.ceil(args.maxDigits)))))
     n = 1
     while n <= maxN :
 	x = pow(maxM, n)
 	sPretty = commaFormat.format(x)
-	sInt = intFormat.format(x)
 
 	if args.maxDigits > 0 :
-	    if len(sInt) <= args.maxDigits :
+	    if math.log(x, 10) <= args.maxDigits :
 		formatList.append(len(sPretty))
 	    else :
 		formatList.append(prettyMaxLen)
@@ -165,7 +166,7 @@ def main():
 		x = pow(m, n)
 		commaFormatPad = "{:>"+ str(formatList[n]) + ",d}"
 		if args.maxDigits > 0 :
-		    if len(intFormat.format(x)) <= args.maxDigits :
+		    if math.log(x, 10) <= (args.maxDigits - kEpsilon):
 			outputLine += commaFormatPad.format(x) + "  "
 		    else :
 			break
