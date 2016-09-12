@@ -96,14 +96,14 @@ def main():
     if args.maxDigits > 0 :
 	n = 2
 	while n <= maxN :
-	    if math.log(pow(2,n), 10) > args.maxDigits :
+	    if math.log(pow(2,n), 10) > args.maxDigits - kEpsilon :
 		n -= 1
 		break
 	    n += 1
 
 	m = 2
 	while m <= maxM :
-	    if math.log(pow(m,2), 10) > args.maxDigits :
+	    if math.log(pow(m,2), 10) > args.maxDigits - kEpsilon :
 		m -= 1
 		break
 	    m += 1
