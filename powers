@@ -29,7 +29,7 @@ def main():
             '''),
         usage="%(prog)s [OPTION]...")
 
-    p.add_argument("--version", action="version", version="1.000")
+    p.add_argument("--version", action="version", version="1.001")
     p.add_argument("--maxExponent", "-n", action="store", type=int, dest="n",
         default=4, metavar="N",
 	help="The highest exponent in the table will be N (default=4).")
@@ -91,28 +91,35 @@ def main():
 	maxM = i
     maxN = args.n
 
-    # Calculate the length of the strings of the highest powers
-    # to be printed out (for formatting purposes)
-    #
     if args.maxDigits > 0 :
+
+	# Calculate the highest exponent to be printed out
+	# (for formatting purposes)
+	#
 	n = 2
 	while n <= maxN :
-	    if math.log(pow(2,n), 10) > args.maxDigits - kEpsilon :
+	    if math.log(pow(2, n), 10) > args.maxDigits - kEpsilon :
 		n -= 1
 		break
 	    n += 1
+	#
+	if n < maxN :
+	    maxN = n
 
+	# Calculate the highest root to be printed out
+	# (for formatting purposes)
+	#
 	m = 2
 	while m <= maxM :
-	    if math.log(pow(m,2), 10) > args.maxDigits - kEpsilon :
+	    if math.log(pow(m, 2), 10) > args.maxDigits - kEpsilon :
 		m -= 1
 		break
 	    m += 1
-
-	if n < maxN :
-	    maxN = n
+	#
 	if m < maxM :
 	    maxM = m
+	while not isPrime[maxM] :
+	    maxM -= 1
 
     outputLine = ""
     formatList = [0]
@@ -123,15 +130,29 @@ def main():
 	    = len(commaFormat.format(int("9"*int(math.ceil(args.maxDigits)))))
     n = 1
     while n <= maxN :
-	x = pow(maxM, n)
-	xWithCommas = commaFormat.format(x)
-
 	if args.maxDigits > 0 :
-	    if math.log(x, 10) <= args.maxDigits - kEpsilon :
-		formatList.append(len(xWithCommas))
-	    else :
-		formatList.append(commaFormatMaxLen)
+	    #
+	    # Need to calculate the actual length of the highest
+	    # nth power of the integer 'm' that also satisfies the constraint
+	    # of 'maxDigits' and possibly taking into account whether it's prime.
+	    # 
+	    m = 2
+	    while m <= maxM :
+		x = pow(m, n)
+		if math.log(x, 10) > args.maxDigits - kEpsilon :
+		    m -= 1
+		    break
+		m += 1
+	    m = m if (m <= maxM) else maxM
+	    while not isPrime[m] :
+		m -= 1
+	    x = pow(m, n)
+	    xWithCommas = commaFormat.format(x)
+	    formatList.append(len(xWithCommas))
+
 	else :
+	    x = pow(maxM, n)
+	    xWithCommas = commaFormat.format(x)
 	    formatList.append(len(xWithCommas))
 
 	commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
