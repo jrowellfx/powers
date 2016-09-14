@@ -41,7 +41,7 @@ def main():
         help="only print out powers of primes" )
     p.add_argument("--limit", action="store", type=float, dest="maxDigits",
         default=-1, metavar="MAX",
-	help="Limit printing powers to numbers of length MAX-digits or less, MAX can be a float (i.e. length is log base 10)")
+	help="Limit printing powers to numbers of length MAX-digits or less")
 
     args = p.parse_args()
 
