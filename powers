@@ -9,7 +9,7 @@ import math
 
 def main():
 
-    kEpsilon = 1.0e-14
+    kEpsilon = 1.0e-12
 
     # Redefine the exception handling routine so that it does NOT
     # do a trace dump if the user types ^C while the command is running.
@@ -25,36 +25,37 @@ def main():
     p = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent('''\
-            Print table of powers of 2 up to n of integers 2 up to m.
+            Print table of powers with exponents 2 up to n of integer roots 2 up to m.
             '''),
         usage="%(prog)s [OPTION]...")
 
-    p.add_argument("--version", action="version", version="0.100")
-    p.add_argument("--power", "-n", action="store", type=int, dest="n",
-        default=3, metavar="N",
-	help="The highest power in the table will be N (default=3).")
-    p.add_argument("--max", "-m", action="store", type=int, dest="m",
-        default=20, metavar="M", help="Print the powers from 2 to M (default=20).")
+    p.add_argument("--version", action="version", version="1.000")
+    p.add_argument("--maxExponent", "-n", action="store", type=int, dest="n",
+        default=4, metavar="N",
+	help="The highest exponent in the table will be N (default=4).")
+    p.add_argument("--maxRoot", "-m", action="store", type=int, dest="m",
+        default=13, metavar="M",
+	help="Print the powers of integers from 2 to M (default=13).")
     p.add_argument("--primes", action="store_true",
         dest="onlyPrimes", default=False,
         help="only print out powers of primes" )
     p.add_argument("--limit", action="store", type=float, dest="maxDigits",
         default=-1, metavar="MAX",
-	help="Limit printing powers to numbers of length MAX-digits or less")
+	help="Limit printing powers to numbers of length MAX-digits or less, MAX can be a float (i.e. length is log base 10)")
 
     args = p.parse_args()
 
     if args.n < 2 :
         print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": error: the maximum power (--power) must be greater than one."
+            ": error: the maximum exponent (--maxExponent) must be greater than one."
         sys.exit(1)
 
     if args.m < 2 :
         print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": error: the maximum integer in the range (--max) must be greater than one."
+            ": error: the maximum integer in the range (--maxRoot) must be greater than one."
         sys.exit(1)
 
-    if args.maxDigits == 0 :
+    if args.maxDigits == 0.0 :
         print >> sys.stderr, os.path.basename(sys.argv[0]) + \
             ": warning: max digits is 0, nothing to print."
         sys.exit(0)
@@ -116,21 +117,22 @@ def main():
     outputLine = ""
     formatList = [0]
     commaFormat = "{:>,d}"
-    prettyMaxLen = 0
+    commaFormatMaxLen = 0
     if args.maxDigits > 0 :
-	prettyMaxLen = len(commaFormat.format(int("9"*int(math.ceil(args.maxDigits)))))
+	commaFormatMaxLen \
+	    = len(commaFormat.format(int("9"*int(math.ceil(args.maxDigits)))))
     n = 1
     while n <= maxN :
 	x = pow(maxM, n)
-	sPretty = commaFormat.format(x)
+	xWithCommas = commaFormat.format(x)
 
 	if args.maxDigits > 0 :
-	    if math.log(x, 10) <= args.maxDigits :
-		formatList.append(len(sPretty))
+	    if math.log(x, 10) <= args.maxDigits - kEpsilon :
+		formatList.append(len(xWithCommas))
 	    else :
-		formatList.append(prettyMaxLen)
+		formatList.append(commaFormatMaxLen)
 	else :
-	    formatList.append(len(sPretty))
+	    formatList.append(len(xWithCommas))
 
 	commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
 	outputLine += commaFormatPad.format(n)
@@ -141,14 +143,14 @@ def main():
 	    outputLine += "  "
 	n += 1
 
-    # Make the dividing line between list of powers 
+    # Make the dividing line between list of exponents
     # and first row of powers of 2.
     #
     dividingLine = "-"*len(outputLine)
     s = list(dividingLine)
     s[formatList[1] + 1] = '+'
 
-    # Print the powers to be displayed on first row
+    # Print the exponents to be displayed on first row
     # then the dividing line.
     #
     print outputLine
@@ -166,7 +168,7 @@ def main():
 		x = pow(m, n)
 		commaFormatPad = "{:>"+ str(formatList[n]) + ",d}"
 		if args.maxDigits > 0 :
-		    if math.log(x, 10) <= (args.maxDigits - kEpsilon):
+		    if math.log(x, 10) <= args.maxDigits - kEpsilon :
 			outputLine += commaFormatPad.format(x) + "  "
 		    else :
 			break
