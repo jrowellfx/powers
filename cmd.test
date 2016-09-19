@@ -6,13 +6,14 @@ import cmd
 class powersQuiz(cmd.Cmd):
     'Testing using cmd library for quizMe program'
 
-    def cmdloop(self, intro=None):
-        print 'cmdloop(%s)' % intro
-        return cmd.Cmd.cmdloop(self, intro)
+    # def cmdloop(self, intro=None):
+        # print 'cmdloop(%s)' % intro
+        # return cmd.Cmd.cmdloop(self, intro)
 
     def __init__(self) :
-        self.i = 0
+        self.i = 1
         cmd.Cmd.__init__(self)
+        self.prompt = "1: "
     
     def preloop(self):
         print 'preloop()'
@@ -20,11 +21,11 @@ class powersQuiz(cmd.Cmd):
     def postloop(self):
         print 'postloop()'
         
-    def parseline(self, line):
-        print 'parseline(%s) =>' % line,
-        ret = cmd.Cmd.parseline(self, line)
-        print ret
-        return ret
+    # def parseline(self, line):
+        # print 'parseline(%s) =>' % line,
+        # ret = cmd.Cmd.parseline(self, line)
+        # print ret
+        # return ret
     
     # def onecmd(self, s):
         # print 'onecmd(%s)' % s
@@ -32,20 +33,22 @@ class powersQuiz(cmd.Cmd):
 
     def emptyline(self):
         print 'emptyline()'
-        print 'i = ' + str(self.i)
         self.i += 1
-        return cmd.Cmd.emptyline(self)
+        print 'i = ' + str(self.i)
+        self.prompt = str(self.i*self.i) + ": "
     
     def default(self, line):
         print 'default(%s)' % line
-        return cmd.Cmd.default(self, line)
+        self.i = int(line)
+        print 'i = ' + str(self.i)
+        self.prompt = str(self.i*self.i) + ": "
     
-    def precmd(self, line):
-        print 'precmd(%s)' % line
-        return cmd.Cmd.precmd(self, line)
+    # def precmd(self, line):
+        # print 'precmd(%s)' % line
+        # return cmd.Cmd.precmd(self, line)
     
     def postcmd(self, stop, line):
-        print 'postcmd(%s, %s)' % (stop, line)
+        # print 'postcmd(%s, %s)' % (stop, line)
         print ''
         return cmd.Cmd.postcmd(self, stop, line)
     
