@@ -11,6 +11,12 @@ from operator import itemgetter
 
 import cmd
 
+ROOT = 0
+EXP = 1
+POWER = 2
+SHUFFLE = 3
+ASK_FOR_ROOT = 4
+
 class powersQuiz(cmd.Cmd):
     'Testing using cmd library for quizMe program'
 
@@ -30,9 +36,9 @@ class powersQuiz(cmd.Cmd):
         print ret
         return ret
     
-    def onecmd(self, s):
-        print 'onecmd(%s)' % s
-        return cmd.Cmd.onecmd(self, s)
+    # def onecmd(self, s):
+        # print 'onecmd(%s)' % s
+        # return cmd.Cmd.onecmd(self, s)
 
     def emptyline(self):
         print 'emptyline()'
@@ -48,6 +54,7 @@ class powersQuiz(cmd.Cmd):
     
     def postcmd(self, stop, line):
         print 'postcmd(%s, %s)' % (stop, line)
+        print ''
         return cmd.Cmd.postcmd(self, stop, line)
     
     def do_skip(self, line):
@@ -59,12 +66,6 @@ class powersQuiz(cmd.Cmd):
         return True
 
 def main():
-
-    ROOT = 0
-    EXP = 1
-    POWER = 2
-    SHUFFLE = 3
-    ASK_FOR_ROOT = 4
 
     # Redefine the exception handling routine so that it does NOT
     # do a trace dump if the user types ^C while the command is running.
@@ -121,11 +122,6 @@ def main():
             ": warning: max digits is 0, nothing to print."
         sys.exit(0)
 
-
-    powersQuiz().cmdloop()
-    print 'finished cmd - going to exit'
-    sys.exit(0)
-
     userAnswerStr = ""
     quizList = []
     for n in powerList :
@@ -139,6 +135,11 @@ def main():
     quizList.sort(key=itemgetter(SHUFFLE))
 
     i = 0
+
+    powersQuiz().cmdloop()
+    print 'finished cmd - going to exit'
+    sys.exit(0)
+
     while i < len(quizList) :
 
 	n = quizList[i][ROOT]
