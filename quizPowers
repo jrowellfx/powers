@@ -24,6 +24,12 @@ quizList = []
 rootList = []
 powerList = []
 
+def rootQ(power, expn) :
+    return str(power) + '^(1/' + str(expn) + ')'
+
+def powerQ(root, expn) :
+    return str(root) + '^' + str(expn)
+
 class powersQuiz(cmd.Cmd) :
     'quiz user on powers of integers'
 
@@ -67,10 +73,10 @@ class powersQuiz(cmd.Cmd) :
 
 	if self.askForRoot :
 	    self.correctAnswer = self.root
-	    self.prompt = str(self.nthPower) + '^(1/' + str(self.exponent) + ')? '
+	    self.prompt = rootQ(self.nthPower, self.exponent) + '? '
 	else :
 	    self.correctAnswer = self.nthPower
-	    self.prompt = str(self.root) + '^' + str(self.exponent) + '? '
+	    self.prompt = powerQ(self.root, self.exponent) + '? '
 
 	self.quizState = GET_ANSWER
 
@@ -155,8 +161,8 @@ def main():
     p.add_argument("--primes", action="store_true",
         dest="onlyPrimes", default=False,
         help="only test the Nth power of primes" )
-    p.add_argument("--limit", action="store", type=int, dest="maxDigits",
-        default=-1, metavar="MAX",
+    p.add_argument("--limit", action="store", type=float, dest="maxDigits",
+        default=-1.0, metavar="MAX",
 	help="Limit testing powers to integers of length MAX-digits or less")
 
     args = p.parse_args()
