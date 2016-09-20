@@ -26,6 +26,8 @@ def main():
 
     jTest = json.dumps(testDict)
 
+    print jTest
+
     j_loadedDict = json.loads(jTest)
 
     print j_loadedDict
