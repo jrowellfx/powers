@@ -21,6 +21,8 @@ ASK_CONTINUE = 0
 GET_ANSWER = 1
 
 quizList = []
+rootList = []
+powerList = []
 
 class powersQuiz(cmd.Cmd) :
     'quiz user on powers of integers'
@@ -121,6 +123,10 @@ def main():
 
     kEpsilon = 1.0e-12
 
+    global quizList
+    global rootList
+    global powerList
+
     # Redefine the exception handling routine so that it does NOT
     # do a trace dump if the user types ^C while the command is running.
     #
@@ -196,13 +202,10 @@ def main():
                 p += 1
 
     i = 2
-    rootList = []
     while i < len(isPrime) :
 	if isPrime[i] :
 	    rootList.append(i)
 	i += 1
-
-    global quizList
 
     for n in powerList :
 	for r in rootList :
