@@ -239,8 +239,7 @@ def main():
     for n in powerList :
 	for r in rootList :
             x = pow(r, n)
-	    if args.maxDigits > 0.0 \
-		and math.log(x, 10) > args.maxDigits - kEpsilon :
+	    if args.maxDigits > 0.0 and math.log(x, 10) > args.maxDigits - kEpsilon :
 		continue
             quizList.append((r, n, x, random.random(), True))
             quizList.append((r, n, x, random.random(), False))
