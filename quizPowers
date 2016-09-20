@@ -28,7 +28,9 @@ fullQuizList = []
 rootList = []
 powerList = []
 
-maxQListSize = 14 # Make sure this is an even number
+# Make sure this is an even number
+#
+maxQListSize = 8
 
 answerDict = {}
 
@@ -43,8 +45,8 @@ def quizListGrow() : # Grows quizList by two elements.
     r = fullQuizList[fqListInd][ROOT]
     e = fullQuizList[fqListInd][EXP]
     x = fullQuizList[fqListInd][POWER]
-    quizList.append((r, e, x, random.random(), True))
-    quizList.append((r, e, x, random.random(), False))
+    quizList.append([r, e, x, random.random(), True])
+    quizList.append([r, e, x, random.random(), False])
     fqListInd += 1
 
 class powersQuiz(cmd.Cmd) :
@@ -129,11 +131,20 @@ class powersQuiz(cmd.Cmd) :
 	else :
 	    print "Unknown command. Try 'help'"
     
+    def precmd(self, line):
+        if len(quizList) < maxQListSize/2  :
+            while len(quizList) < maxQListSize :
+                quizListGrow() 
+            i = 0
+            while i < len(quizList) :
+                quizList[i][SHUFFLE] = random.random()
+                i += 1
+            quizList.sort(key=itemgetter(SHUFFLE))
+            print quizList
+	return cmd.Cmd.precmd(self, line)
+    
     def postcmd(self, stop, line):
 	print ''
-        if len(quizList) <= maxQListSize - 2 :
-            quizListGrow() 
-            quizList.sort(key=itemgetter(SHUFFLE))
 	return cmd.Cmd.postcmd(self, stop, line)
     
     def do_pass(self, line):
@@ -145,7 +156,6 @@ class powersQuiz(cmd.Cmd) :
 	return True
 
 def main():
-
 
     # Redefine the exception handling routine so that it does NOT
     # do a trace dump if the user types ^C while the command is running.
@@ -235,10 +245,13 @@ def main():
             fullQuizList.append((r, e, x))
     fullQuizList.sort(key=itemgetter(POWER))
 
+    random.seed()
+
     fqListInd = 0
     while fqListInd < len(fullQuizList) and len(quizList) < maxQListSize :
         quizListGrow()
     quizList.sort(key=itemgetter(SHUFFLE))
+    print quizList
 
     powersQuiz().cmdloop()
     sys.exit(0)
