@@ -24,6 +24,8 @@ quizList = []
 rootList = []
 powerList = []
 
+answerDict = {}
+
 def rootQ(power, expn) :
     return str(power) + '^(1/' + str(expn) + ')'
 
@@ -45,6 +47,7 @@ class powersQuiz(cmd.Cmd) :
 	self.nthPower = 1
 	self.askForRoot = True
 	self.correctAnswer = 1
+        self.qStr = ""
 
         self.prompt = "Begin quiz? "
 	self.quizState = ASK_CONTINUE
@@ -73,16 +76,19 @@ class powersQuiz(cmd.Cmd) :
 
 	if self.askForRoot :
 	    self.correctAnswer = self.root
-	    self.prompt = rootQ(self.nthPower, self.exponent) + '? '
+	    self.qStr = rootQ(self.nthPower, self.exponent)
+	    self.prompt = self.qStr + '? '
 	else :
 	    self.correctAnswer = self.nthPower
-	    self.prompt = powerQ(self.root, self.exponent) + '? '
+	    self.qStr = powerQ(self.root, self.exponent)
+	    self.prompt = self.qStr + '? '
 
 	self.quizState = GET_ANSWER
 
     def emptyline(self):
 	global ASK_CONTINUE
 	global GET_ANSWER
+        global answerDict
 
 	if self.quizState == ASK_CONTINUE :
 	    self.getNextQuestion()
@@ -90,11 +96,18 @@ class powersQuiz(cmd.Cmd) :
 
 	elif self.quizState == GET_ANSWER :
 	    self.endTime = time.time()
+            if answerDict.has_key(self.qStr) :
+                aswerDict[self.qStr].append(((self.endTime - self.startTime), False))
+            else :
+                answerDict[self.qStr] = [((self.endTime - self.startTime), False)]
 	    print self.correctAnswer
+            print answerDict[self.qStr]
 	    self.prompt = 'continue? '
 	    self.quizState = ASK_CONTINUE
     
     def default(self, line):
+        global answerDict
+
 	if self.quizState == GET_ANSWER :
 	    self.endTime = time.time()
 	    try :
@@ -109,7 +122,17 @@ class powersQuiz(cmd.Cmd) :
 		    self.quizState = ASK_CONTINUE
 		else :
 		    print "Incorrect"
-		    self.startTime = time.time()
+
+                if answerDict.has_key(self.qStr) :
+                    answerDict[self.qStr].append( \
+                        ((self.endTime - self.startTime), (userAnswer == self.correctAnswer)))
+                else :
+                    answerDict[self.qStr] \
+                        = [((self.endTime - self.startTime), (userAnswer == self.correctAnswer))]
+
+                print answerDict[self.qStr]
+
+                self.startTime = time.time()
 	else :
 	    print "Unknown command. Try 'help'"
     

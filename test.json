@@ -3,6 +3,7 @@
 import sys
 import json
 import ast
+import io
 
 def main():
 
@@ -22,21 +23,33 @@ def main():
     testDict['b'] = [2, 3.0, 4]
     testDict['c'] = [4, 6.0, 8]
 
+    print ""
+    print "testDict"
     print testDict
 
-    jTest = json.dumps(testDict)
-
+    jTest = json.dumps(testDict, ensure_ascii=False)
+    print "json data"
     print jTest
 
-    j_loadedDict = json.loads(jTest)
+    with open('testout.json', 'w') as f :
+        json.dump(jTest, f)
 
-    print j_loadedDict
-
-    a_loadedDict = ast.literal_eval(jTest)
-
+    with open('testout.json', 'r') as f :
+        data = json.load(f)
+    a_loadedDict = ast.literal_eval(data)
+    print "After reading file"
     print a_loadedDict
 
-    sys.exit(0)
+    # j_loadedDict = json.loads(jTest)
+    # print j_loadedDict
+
+    # a_loadedDict = ast.literal_eval(jTest)
+    # with open('testout.json', 'r') as infile :
+        # a_loadedDict = ast.literal_eval(infile)
+    # print "loaded jTest"
+    # print a_loadedDict
+
+    # sys.exit(0)
         
 if __name__ == '__main__':
     main()
