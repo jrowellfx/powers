@@ -20,12 +20,14 @@ ASK_FOR_ROOT = 4
 ASK_CONTINUE = 0
 GET_ANSWER = 1
 
+kEpsilon = 1.0e-12
+fqListInd = 0
+
 quizList = []
 fullQuizList = []
 rootList = []
 powerList = []
 
-fqListInd = 0
 maxQListSize = 14 # Make sure this is an even number
 
 answerDict = {}
@@ -36,13 +38,19 @@ def rootQ(power, expn) :
 def powerQ(root, expn) :
     return str(root) + '^' + str(expn)
 
+def quizListGrow() : # Grows quizList by two elements.
+    global fqListInd
+    r = fullQuizList[fqListInd][ROOT]
+    e = fullQuizList[fqListInd][EXP]
+    x = fullQuizList[fqListInd][POWER]
+    quizList.append((r, e, x, random.random(), True))
+    quizList.append((r, e, x, random.random(), False))
+    fqListInd += 1
+
 class powersQuiz(cmd.Cmd) :
     'quiz user on powers of integers'
 
     def __init__(self) :
-	global ASK_CONTINUE
-
-        self.i = -1
 	self.startTime = 0.0
 	self.endTime = 0.0
 
@@ -59,24 +67,11 @@ class powersQuiz(cmd.Cmd) :
         cmd.Cmd.__init__(self)
 
     def getNextQuestion(self) :
-	global quizList
-	global ROOT
-	global EXP
-	global POWER
-	global SHUFFLE
-	global ASK_FOR_ROOT
-	global GET_ANSWER
-
-	self.i += 1
-
-	if self.i >= len(quizList) :
-	    # Explore better way of doing this later - jpr
-	    sys.exit(0)
-
-	self.root = quizList[self.i][ROOT]
-	self.exponent = quizList[self.i][EXP]
-	self.nthPower = quizList[self.i][POWER]
-	self.askForRoot = quizList[self.i][ASK_FOR_ROOT]
+	self.root = quizList[-1][ROOT]
+	self.exponent = quizList[-1][EXP]
+	self.nthPower = quizList[-1][POWER]
+	self.askForRoot = quizList[-1][ASK_FOR_ROOT]
+        quizList.pop()
 
 	if self.askForRoot :
 	    self.correctAnswer = self.root
@@ -90,10 +85,6 @@ class powersQuiz(cmd.Cmd) :
 	self.quizState = GET_ANSWER
 
     def emptyline(self):
-	global ASK_CONTINUE
-	global GET_ANSWER
-        global answerDict
-
 	if self.quizState == ASK_CONTINUE :
 	    self.getNextQuestion()
 	    self.startTime = time.time()
@@ -101,7 +92,7 @@ class powersQuiz(cmd.Cmd) :
 	elif self.quizState == GET_ANSWER :
 	    self.endTime = time.time()
             if answerDict.has_key(self.qStr) :
-                aswerDict[self.qStr].append(((self.endTime - self.startTime), False))
+                answerDict[self.qStr].append(((self.endTime - self.startTime), False))
             else :
                 answerDict[self.qStr] = [((self.endTime - self.startTime), False)]
 	    print self.correctAnswer
@@ -110,8 +101,6 @@ class powersQuiz(cmd.Cmd) :
 	    self.quizState = ASK_CONTINUE
     
     def default(self, line):
-        global answerDict
-
 	if self.quizState == GET_ANSWER :
 	    self.endTime = time.time()
 	    try :
@@ -142,6 +131,9 @@ class powersQuiz(cmd.Cmd) :
     
     def postcmd(self, stop, line):
 	print ''
+        if len(quizList) <= maxQListSize - 2 :
+            quizListGrow() 
+            quizList.sort(key=itemgetter(SHUFFLE))
 	return cmd.Cmd.postcmd(self, stop, line)
     
     def do_pass(self, line):
@@ -154,14 +146,6 @@ class powersQuiz(cmd.Cmd) :
 
 def main():
 
-    kEpsilon = 1.0e-12
-
-    global quizList
-    global fullQuizList
-    global rootList
-    global powerList
-    global fqListInd
-    global maxQListSize
 
     # Redefine the exception handling routine so that it does NOT
     # do a trace dump if the user types ^C while the command is running.
@@ -251,13 +235,9 @@ def main():
             fullQuizList.append((r, e, x))
     fullQuizList.sort(key=itemgetter(POWER))
 
-    while fqListInd < len(fullQuizList) and fqListInd < (maxQListSize/2) :
-        r = fullQuizList[fqListInd][ROOT]
-        e = fullQuizList[fqListInd][EXP]
-        x = fullQuizList[fqListInd][POWER]
-        quizList.append((r, e, x, random.random(), True))
-        quizList.append((r, e, x, random.random(), False))
-        fqListInd += 1
+    fqListInd = 0
+    while fqListInd < len(fullQuizList) and len(quizList) < maxQListSize :
+        quizListGrow()
     quizList.sort(key=itemgetter(SHUFFLE))
 
     powersQuiz().cmdloop()
