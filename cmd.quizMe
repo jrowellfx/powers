@@ -8,7 +8,6 @@ import textwrap
 import time
 import random
 from operator import itemgetter
-
 import cmd
 
 ROOT = 0
@@ -17,53 +16,105 @@ POWER = 2
 SHUFFLE = 3
 ASK_FOR_ROOT = 4
 
-class powersQuiz(cmd.Cmd):
-    'Testing using cmd library for quizMe program'
+ASK_CONTINUE = 0
+GET_ANSWER = 1
 
-    def cmdloop(self, intro=None):
-        print 'cmdloop(%s)' % intro
-        return cmd.Cmd.cmdloop(self, intro)
-    
-    def preloop(self):
-        print 'preloop()'
-    
-    def postloop(self):
-        print 'postloop()'
-        
-    def parseline(self, line):
-        print 'parseline(%s) =>' % line,
-        ret = cmd.Cmd.parseline(self, line)
-        print ret
-        return ret
-    
-    # def onecmd(self, s):
-        # print 'onecmd(%s)' % s
-        # return cmd.Cmd.onecmd(self, s)
+quizList = []
+
+class powersQuiz(cmd.Cmd) :
+    'quiz user on powers of integers'
+
+    def __init__(self) :
+	global ASK_CONTINUE
+
+        self.i = -1
+	self.startTime = 0.0
+	self.endTime = 0.0
+
+	self.root = 1
+	self.exponent = 1
+	self.nthPower = 1
+	self.askForRoot = True
+	self.correctAnswer = 1
+
+        self.prompt = "Begin quiz? "
+	self.quizState = ASK_CONTINUE
+
+        cmd.Cmd.__init__(self)
+
+    def getNextQuestion(self) :
+	global quizList
+	global ROOT
+	global EXP
+	global POWER
+	global SHUFFLE
+	global ASK_FOR_ROOT
+	global GET_ANSWER
+
+	self.i += 1
+
+	if self.i >= len(quizList) :
+	    # Explore better way of doing this later - jpr
+	    sys.exit(0)
+
+	self.root = quizList[self.i][ROOT]
+	self.exponent = quizList[self.i][EXP]
+	self.nthPower = quizList[self.i][POWER]
+	self.askForRoot = quizList[self.i][ASK_FOR_ROOT]
+
+	if self.askForRoot :
+	    self.correctAnswer = self.root
+	    self.prompt = str(self.nthPower) + '^(1/' + str(self.exponent) + ')? '
+	else :
+	    self.correctAnswer = self.nthPower
+	    self.prompt = str(self.root) + '^' + str(self.exponent) + '? '
+
+	self.quizState = GET_ANSWER
 
     def emptyline(self):
-        print 'emptyline()'
-        return cmd.Cmd.emptyline(self)
+	global ASK_CONTINUE
+	global GET_ANSWER
+
+	if self.quizState == ASK_CONTINUE :
+	    self.getNextQuestion()
+	    self.startTime = time.time()
+
+	elif self.quizState == GET_ANSWER :
+	    self.endTime = time.time()
+	    print self.correctAnswer
+	    self.prompt = 'continue? '
+	    self.quizState = ASK_CONTINUE
     
     def default(self, line):
-        print 'default(%s)' % line
-        return cmd.Cmd.default(self, line)
-    
-    def precmd(self, line):
-        print 'precmd(%s)' % line
-        return cmd.Cmd.precmd(self, line)
+	if self.quizState == GET_ANSWER :
+	    self.endTime = time.time()
+	    try :
+		userAnswer = int(line)
+	    except ValueError :
+		print "Value typed was not an integer"
+		self.startTime = time.time()
+	    else :
+		if userAnswer == self.correctAnswer :
+		    print "Correct"
+		    self.prompt = 'continue? '
+		    self.quizState = ASK_CONTINUE
+		else :
+		    print "Incorrect"
+		    self.startTime = time.time()
+	else :
+	    print "Unknown command. Try 'help'"
     
     def postcmd(self, stop, line):
-        print 'postcmd(%s, %s)' % (stop, line)
-        print ''
-        return cmd.Cmd.postcmd(self, stop, line)
+	print ''
+	return cmd.Cmd.postcmd(self, stop, line)
     
-    def do_skip(self, line):
-        "Don't know the answer, skip the question being asked"
-        print 'skipping'
+    def do_pass(self, line):
+	"Don't know the answer, skip the question being asked"
+	print 'skipping'
 
     def do_EOF(self, line):
-        "Exit"
-        return True
+	"Exit"
+	return True
 
 def main():
 
@@ -122,8 +173,8 @@ def main():
             ": warning: max digits is 0, nothing to print."
         sys.exit(0)
 
-    userAnswerStr = ""
-    quizList = []
+    global quizList
+
     for n in powerList :
         i = 2
         while i <= args.m :
@@ -134,70 +185,13 @@ def main():
 
     quizList.sort(key=itemgetter(SHUFFLE))
 
-    i = 0
-
     powersQuiz().cmdloop()
-    print 'finished cmd - going to exit'
     sys.exit(0)
 
-    while i < len(quizList) :
+if __name__ == '__main__':
+    main()
 
-	n = quizList[i][ROOT]
-	exponent = quizList[i][EXP]
-	nthPower = quizList[i][POWER]
-	askForRoot = quizList[i][ASK_FOR_ROOT]
-	if askForRoot :
-	    correctAnswer = n
-	else :
-	    correctAnswer = nthPower
-
-	print ""
-	startTime = time.time()
-	try :
-	    if askForRoot :
-		userAnswerStr = raw_input(str(nthPower) + '^(1/' + str(exponent) + ')? --> ')
-	    else :
-		userAnswerStr = raw_input(str(n) + '^' + str(exponent) + '? --> ')
-	except EOFError :
-	    print "" 
-	    print ""
-	    print "exit"
-	    break
-	endTime = time.time()
-	print endTime - startTime
-
-	if userAnswerStr == 'pass' :
-	    i += 1
-	    continue
-
-
-	try :
-	    userAnswer = int(userAnswerStr)
-	except ValueError :
-	    print "Value typed was not an integer"
-	else :
-	    if userAnswer == correctAnswer :
-		print "Correct"
-		i += 1
-	    else :
-		print "Incorrect"
-		continue
-
-	print ""
-	try :
-	    userAnswerStr = raw_input('[continue?] ')
-	except EOFError :
-	    print "" 
-	    print ""
-	    print "exit"
-	    break
-
-	if userAnswerStr in ('exit', 'quit') :
-	    print ""
-	    print "exit"
-	    break
-
-    exit(0)
+    '''
 
     # Note: this "isPrime" array will be filled with True 
     # in the case that we want to display ALL the integers
@@ -317,6 +311,4 @@ def main():
 		n += 1
 	    print outputLine
         m += 1
-        
-if __name__ == '__main__':
-    main()
+    '''
