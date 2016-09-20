@@ -21,8 +21,12 @@ ASK_CONTINUE = 0
 GET_ANSWER = 1
 
 quizList = []
+fullQuizList = []
 rootList = []
 powerList = []
+
+fqListInd = 0
+maxQListSize = 14 # Make sure this is an even number
 
 answerDict = {}
 
@@ -153,8 +157,11 @@ def main():
     kEpsilon = 1.0e-12
 
     global quizList
+    global fullQuizList
     global rootList
     global powerList
+    global fqListInd
+    global maxQListSize
 
     # Redefine the exception handling routine so that it does NOT
     # do a trace dump if the user types ^C while the command is running.
@@ -236,14 +243,21 @@ def main():
 	    rootList.append(i)
 	i += 1
 
-    for n in powerList :
+    for e in powerList :
 	for r in rootList :
-            x = pow(r, n)
+            x = pow(r, e)
 	    if args.maxDigits > 0.0 and math.log(x, 10) > args.maxDigits - kEpsilon :
 		continue
-            quizList.append((r, n, x, random.random(), True))
-            quizList.append((r, n, x, random.random(), False))
+            fullQuizList.append((r, e, x))
+    fullQuizList.sort(key=itemgetter(POWER))
 
+    while fqListInd < len(fullQuizList) and fqListInd < (maxQListSize/2) :
+        r = fullQuizList[fqListInd][ROOT]
+        e = fullQuizList[fqListInd][EXP]
+        x = fullQuizList[fqListInd][POWER]
+        quizList.append((r, e, x, random.random(), True))
+        quizList.append((r, e, x, random.random(), False))
+        fqListInd += 1
     quizList.sort(key=itemgetter(SHUFFLE))
 
     powersQuiz().cmdloop()
