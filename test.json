@@ -1,0 +1,40 @@
+#!/usr/bin/python2.7
+
+import sys
+import json
+import ast
+
+def main():
+
+    # Redefine the exception handling routine so that it does NOT
+    # do a trace dump if the user types ^C while the command is running.
+    #
+    old_excepthook = sys.excepthook
+    def new_hook(exceptionType, value, traceback):
+        if exceptionType != KeyboardInterrupt and exceptionType != IOError:
+            old_excepthook(exceptionType, value, traceback)
+        else:
+            pass
+    sys.excepthook = new_hook
+
+    testDict = {}
+    testDict['a'] = [1, 2.0, 3]
+    testDict['b'] = [2, 3.0, 4]
+    testDict['c'] = [4, 6.0, 8]
+
+    print testDict
+
+    jTest = json.dumps(testDict)
+
+    j_loadedDict = json.loads(jTest)
+
+    print j_loadedDict
+
+    a_loadedDict = ast.literal_eval(jTest)
+
+    print a_loadedDict
+
+    sys.exit(0)
+        
+if __name__ == '__main__':
+    main()
