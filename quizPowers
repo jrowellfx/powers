@@ -45,6 +45,9 @@ def rootQ(power, expn) :
 def powerQ(root, expn) :
     return str(root) + '^' + str(expn)
 
+# Test this case and debug.... 
+#   quizPowers -n `expandseq -d space 2-16` -m 53 --limit 1
+#
 def quizListGrow() : # Grows quizList by two elements.
     global fqListInd
     r = fullQuizList[fqListInd][ROOT]
@@ -180,9 +183,9 @@ class powersQuiz(cmd.Cmd) :
 	print ''
 	return cmd.Cmd.postcmd(self, stop, line)
     
-    def do_pass(self, line):
-	"Don't know the answer, skip the question being asked"
+    def do_stats(self, line):
 	print 'skipping'
+        print answerDict
 
     def do_EOF(self, line):
 	"Exit"
@@ -277,10 +280,11 @@ def main():
 		continue
             fullQuizList.append((r, e, x))
     fullQuizList.sort(key=itemgetter(POWER))
+    print fullQuizList
 
     random.seed()
 
-    fqListInd = 0
+    global fqListInd
     while fqListInd < len(fullQuizList) and len(quizList) < maxQListSize :
         quizListGrow()
     quizList.sort(key=itemgetter(SHUFFLE))
