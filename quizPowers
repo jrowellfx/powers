@@ -195,8 +195,11 @@ class powersQuiz(cmd.Cmd) :
 	print ''
 	return cmd.Cmd.postcmd(self, stop, line)
     
-    def do_stats(self, line):
-	print 'skipping'
+    def do_repeat(self, line) :
+        global fqListInd
+        fqListInd = 0
+    
+    def do_stats(self, line) :
         print answerDict
 
     def do_EOF(self, line):
