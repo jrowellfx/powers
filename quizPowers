@@ -63,11 +63,11 @@ class powersQuiz(cmd.Cmd) :
 
 	self.root = 1
 	self.exponent = 1
-	self.nthPower = 1
+	self.power = 1
 	self.askForRoot = True
 	self.correctAnswer = 1
         self.qStr = ""
-	set.wasLastWrong = False
+	self.wasLastWrong = False
 
         self.prompt = "Begin quiz? "
 	self.quizState = ASK_CONTINUE
@@ -77,21 +77,21 @@ class powersQuiz(cmd.Cmd) :
     def getNextQuestion(self) :
 	self.root = quizList[-1][ROOT]
 	self.exponent = quizList[-1][EXP]
-	self.nthPower = quizList[-1][POWER]
+	self.power = quizList[-1][POWER]
 	self.askForRoot = quizList[-1][ASK_FOR_ROOT]
         quizList.pop()
 
 	if self.askForRoot :
 	    self.correctAnswer = self.root
-	    self.qStr = rootQ(self.nthPower, self.exponent)
+	    self.qStr = rootQ(self.power, self.exponent)
 	    self.prompt = self.qStr + '? '
 	else :
-	    self.correctAnswer = self.nthPower
+	    self.correctAnswer = self.power
 	    self.qStr = powerQ(self.root, self.exponent)
 	    self.prompt = self.qStr + '? '
 
 	self.quizState = GET_ANSWER
-	set.wasLastWrong = False
+	self.wasLastWrong = False
 
     def emptyline(self):
 	if self.quizState == ASK_CONTINUE :
