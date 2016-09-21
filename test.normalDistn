@@ -1,0 +1,58 @@
+#!/usr/bin/python2.7
+
+import sys
+import json
+import ast
+import io
+import math
+
+def stndNormDist(x) :
+    return 1.0/math.sqrt(math.pow(math.e, x*x))
+
+def genWeights(n) :
+
+    if n <= 0 :
+        return []
+
+    result = [1.0]
+
+    scale = float(n-1 if n <= 3 else 3)
+
+    i = 1
+    while i < n :
+        result.append(stndNormDist(scale*float(i)/float(n-1)))
+        i += 1
+
+    return result
+
+def main():
+
+    # Redefine the exception handling routine so that it does NOT
+    # do a trace dump if the user types ^C while the command is running.
+    #
+    old_excepthook = sys.excepthook
+    def new_hook(exceptionType, value, traceback):
+        if exceptionType != KeyboardInterrupt and exceptionType != IOError:
+            old_excepthook(exceptionType, value, traceback)
+        else:
+            pass
+    sys.excepthook = new_hook
+
+    print genWeights(0)
+    print genWeights(1)
+    print genWeights(2)
+    print genWeights(4)
+    print genWeights(8)
+    print genWeights(13)
+    print genWeights(19)
+        
+    print math.fsum(genWeights(0))
+    print math.fsum(genWeights(1))
+    print math.fsum(genWeights(2))
+    print math.fsum(genWeights(4))
+    print math.fsum(genWeights(8))
+    print math.fsum(genWeights(13))
+    print math.fsum(genWeights(19))
+        
+if __name__ == '__main__':
+    main()
