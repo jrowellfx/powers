@@ -50,12 +50,16 @@ def powerQ(root, expn) :
 #
 def quizListGrow() : # Grows quizList by two elements.
     global fqListInd
-    r = fullQuizList[fqListInd][ROOT]
-    e = fullQuizList[fqListInd][EXP]
-    x = fullQuizList[fqListInd][POWER]
-    quizList.append([r, e, x, random.random(), True])
-    quizList.append([r, e, x, random.random(), False])
-    fqListInd += 1
+    if fqListInd < len(fullQuizList) :
+        r = fullQuizList[fqListInd][ROOT]
+        e = fullQuizList[fqListInd][EXP]
+        x = fullQuizList[fqListInd][POWER]
+        quizList.append([r, e, x, random.random(), True])
+        quizList.append([r, e, x, random.random(), False])
+        fqListInd += 1
+        return True
+    else :
+        return False
 
 class powersQuiz(cmd.Cmd) :
     'quiz user on powers of integers'
@@ -87,6 +91,11 @@ class powersQuiz(cmd.Cmd) :
 	    askAgainQuickList.pop(0)
 	    self.quickAsk = -1 if len(askAgainQuickList) <= 0 else quickWaitCycles
 	else :
+            if len(quizList) == 0 :
+                self.prompt = 'finished quiz '
+                self.quizState = ASK_CONTINUE
+                return False
+
 	    self.root       = quizList[-1][ROOT]
 	    self.exponent   = quizList[-1][EXP]
 	    self.power      = quizList[-1][POWER]
@@ -106,6 +115,7 @@ class powersQuiz(cmd.Cmd) :
 
 	self.quizState = GET_ANSWER
 	self.wasLastWrong = False
+        return True
 
     def emptyline(self):
 	if self.quizState == ASK_CONTINUE :
@@ -117,7 +127,8 @@ class powersQuiz(cmd.Cmd) :
             if answerDict.has_key(self.qStr) :
                 answerDict[self.qStr].append(((self.endTime - self.startTime), False))
             else :
-                answerDict[self.qStr] = [((self.endTime - self.startTime), False)]
+                answerDict[self.qStr] = [[self.root, self.exponent, self.power, \
+		    0.0, self.askForRoot], ((self.endTime - self.startTime), False)]
 	    if not self.lastWasWrong :
 		askAgainQuickList.append( \
 		    [self.root, self.exponent, self.power, \
@@ -157,8 +168,8 @@ class powersQuiz(cmd.Cmd) :
                         ((self.endTime - self.startTime), \
 			(userAnswer == self.correctAnswer)))
                 else :
-                    answerDict[self.qStr] \
-                        = [((self.endTime - self.startTime), \
+                    answerDict[self.qStr] = [[self.root, self.exponent, self.power, \
+                        0.0, self.askForRoot], ((self.endTime - self.startTime), \
 			(userAnswer == self.correctAnswer))]
 
                 print answerDict[self.qStr]
@@ -170,7 +181,8 @@ class powersQuiz(cmd.Cmd) :
     def precmd(self, line):
         if len(quizList) < maxQListSize/2  :
             while len(quizList) < maxQListSize :
-                quizListGrow() 
+                if not quizListGrow() :
+                    break
             i = 0
             while i < len(quizList) :
                 quizList[i][SHUFFLE] = random.random()
