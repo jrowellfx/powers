@@ -23,10 +23,15 @@ GET_ANSWER = 1
 kEpsilon = 1.0e-12
 fqListInd = 0
 
+quickWaitCycles = 3
+delayWaitCycles = 11
+
 quizList = []
 fullQuizList = []
 rootList = []
 powerList = []
+askAgainQuickList = []
+askAgainDelayList = []
 
 # Make sure this is an even number
 #
@@ -62,6 +67,7 @@ class powersQuiz(cmd.Cmd) :
 	self.askForRoot = True
 	self.correctAnswer = 1
         self.qStr = ""
+	set.wasLastWrong = False
 
         self.prompt = "Begin quiz? "
 	self.quizState = ASK_CONTINUE
@@ -85,6 +91,7 @@ class powersQuiz(cmd.Cmd) :
 	    self.prompt = self.qStr + '? '
 
 	self.quizState = GET_ANSWER
+	set.wasLastWrong = False
 
     def emptyline(self):
 	if self.quizState == ASK_CONTINUE :
@@ -97,6 +104,9 @@ class powersQuiz(cmd.Cmd) :
                 answerDict[self.qStr].append(((self.endTime - self.startTime), False))
             else :
                 answerDict[self.qStr] = [((self.endTime - self.startTime), False)]
+	    askAgainQuickList.append( \
+		[self.root, self.exponent, self.power, \
+		0.0, self.askForRoot])
 	    print self.correctAnswer
             print answerDict[self.qStr]
 	    self.prompt = 'continue? '
@@ -120,10 +130,12 @@ class powersQuiz(cmd.Cmd) :
 
                 if answerDict.has_key(self.qStr) :
                     answerDict[self.qStr].append( \
-                        ((self.endTime - self.startTime), (userAnswer == self.correctAnswer)))
+                        ((self.endTime - self.startTime), \
+			(userAnswer == self.correctAnswer)))
                 else :
                     answerDict[self.qStr] \
-                        = [((self.endTime - self.startTime), (userAnswer == self.correctAnswer))]
+                        = [((self.endTime - self.startTime), \
+			(userAnswer == self.correctAnswer))]
 
                 print answerDict[self.qStr]
 
