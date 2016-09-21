@@ -24,7 +24,7 @@ kEpsilon = 1.0e-12
 fqListInd = 0
 
 quickWaitCycles = 3
-delayWaitCycles = 11
+delayWaitCycles = 7
 
 quizList = []
 fullQuizList = []
@@ -67,19 +67,30 @@ class powersQuiz(cmd.Cmd) :
 	self.askForRoot = True
 	self.correctAnswer = 1
         self.qStr = ""
-	self.wasLastWrong = False
+	self.lastWasWrong = False
 
         self.prompt = "Begin quiz? "
 	self.quizState = ASK_CONTINUE
+	self.quickAsk = -1
 
         cmd.Cmd.__init__(self)
 
     def getNextQuestion(self) :
-	self.root = quizList[-1][ROOT]
-	self.exponent = quizList[-1][EXP]
-	self.power = quizList[-1][POWER]
-	self.askForRoot = quizList[-1][ASK_FOR_ROOT]
-        quizList.pop()
+	if self.quickAsk == 0 :
+	    self.root       = askAgainQuickList[0][ROOT]
+	    self.exponent   = askAgainQuickList[0][EXP]
+	    self.power      = askAgainQuickList[0][POWER]
+	    self.askForRoot = askAgainQuickList[0][ASK_FOR_ROOT]
+	    askAgainQuickList.pop(0)
+	    self.quickAsk = -1 if len(askAgainQuickList) <= 0 else quickWaitCycles
+	else :
+	    self.root       = quizList[-1][ROOT]
+	    self.exponent   = quizList[-1][EXP]
+	    self.power      = quizList[-1][POWER]
+	    self.askForRoot = quizList[-1][ASK_FOR_ROOT]
+	    quizList.pop()
+	    if self.quickAsk > 0 :
+		self.quickAsk -= 1
 
 	if self.askForRoot :
 	    self.correctAnswer = self.root
@@ -104,9 +115,12 @@ class powersQuiz(cmd.Cmd) :
                 answerDict[self.qStr].append(((self.endTime - self.startTime), False))
             else :
                 answerDict[self.qStr] = [((self.endTime - self.startTime), False)]
-	    askAgainQuickList.append( \
-		[self.root, self.exponent, self.power, \
-		0.0, self.askForRoot])
+	    if not self.lastWasWrong :
+		askAgainQuickList.append( \
+		    [self.root, self.exponent, self.power, \
+		    0.0, self.askForRoot])
+	    if self.quickAsk < 0 :
+		self.quickAsk = quickWaitCycles
 	    print self.correctAnswer
             print answerDict[self.qStr]
 	    self.prompt = 'continue? '
@@ -127,6 +141,13 @@ class powersQuiz(cmd.Cmd) :
 		    self.quizState = ASK_CONTINUE
 		else :
 		    print "Incorrect"
+		    if not self.lastWasWrong :
+			askAgainQuickList.append( \
+			    [self.root, self.exponent, self.power, \
+			    0.0, self.askForRoot])
+			self.lastWasWrong = True
+			if self.quickAsk < 0 :
+			    self.quickAsk = quickWaitCycles
 
                 if answerDict.has_key(self.qStr) :
                     answerDict[self.qStr].append( \
