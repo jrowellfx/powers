@@ -17,6 +17,9 @@ POWER = 2
 SHUFFLE = 3
 ASK_FOR_ROOT = 4
 
+ANSWER_TIME = 0
+WAS_CORRECT = 1
+
 ASK_CONTINUE = 0
 GET_ANSWER = 1
 
@@ -39,11 +42,59 @@ maxQListSize = 8
 
 answerDict = {}
 
+def stndNormDist(x) :
+    return 1.0/math.sqrt(math.pow(math.e, x*x))
+
+def genWeights(n) :
+    if n <= 0 :
+        return []
+    result = [1.0]
+    scale = float(n-1 if n <= 3 else 3)
+    i = 1
+    while i < n :
+        result.append(stndNormDist(scale*float(i)/float(n-1)))
+        i += 1
+    return result
+
+def weightedAvg(list) :
+    weights = genWeights(len(list))
+    wList = []
+    i = 0
+    while i < len(list) :
+        wList.append(weights[i] * list[i])
+        i += 1
+    return math.fsum(wList) / math.fsum(weights)
+
 def rootQ(power, expn) :
     return str(power) + '^(1/' + str(expn) + ')'
 
 def powerQ(root, expn) :
     return str(root) + '^' + str(expn)
+
+getSlowestAnswers (n) :
+    if n <= 0 :
+        return []
+
+    qList = []
+    times = []
+    for key in answerDict :
+        qList.append(answerDict[key][1])
+        i = 1
+        while i < len(answerDict[key]) :
+            if answerDict[key][WAS_CORRECT] :
+                times.append(answerDict[key][WAS_CORRECT])
+            i += 1
+        if times == [] :
+            qList.pop()
+            continue
+        times.reverse()
+        avgAnswerTime = weightedAvg(times)
+        qList[-1][SHUFFLE] = avgAnswerTime
+
+    qList.sort(key=itemgetter(SHUFFLE))
+    qList.reverse()
+
+    return qList[:n]
 
 # Test this case and debug.... 
 #   quizPowers -n `expandseq -d space 2-16` -m 53 --limit 1
