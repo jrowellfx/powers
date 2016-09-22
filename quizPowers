@@ -107,23 +107,38 @@ def growQuizList() :
     global fqListInd
     global quizList
 
-    # Grows quizList by two elements.
+    # If there are powers in the full list that have not
+    # been asked yet draw questions from those.
     #
     if fqListInd < len(fullQuizList) :
-        r = fullQuizList[fqListInd][ROOT]
-        e = fullQuizList[fqListInd][EXP]
-        x = fullQuizList[fqListInd][POWER]
-        quizList.append([r, e, x, 0.0, True])
-        quizList.append([r, e, x, 0.0, False])
-        fqListInd += 1
-        return True
 
+        if len(quizList) < maxQListSize/2 :
+            while len(quizList) < maxQListSize and fqListInd < len(fullQuizList) :
+                r = fullQuizList[fqListInd][ROOT]
+                e = fullQuizList[fqListInd][EXP]
+                x = fullQuizList[fqListInd][POWER]
+                quizList.append([r, e, x, 0.0, True])
+                quizList.append([r, e, x, 0.0, False])
+                fqListInd += 1
+            i = 0
+            while i < len(quizList) :
+                quizList[i][SHUFFLE] = random.random()
+                i += 1
+            quizList.sort(key=itemgetter(SHUFFLE))
+            return True
+        else :
+            return False
+           
     # Grows up to max size of quizList if quizList is empty
     #
     elif len(quizList) == 0 :
-        extraQuestions = getSlowestAnswers(maxQListSize)
-        quizList = extraQuestions
-        return len(extraQuestions) > 0
+        quizList = getSlowestAnswers(maxQListSize)
+        i = 0
+        while i < len(quizList) :
+            quizList[i][SHUFFLE] = random.random()
+            i += 1
+        quizList.sort(key=itemgetter(SHUFFLE))
+        return len(quizList) > 0
 
     else :
         return False
@@ -222,11 +237,7 @@ class powersQuiz(cmd.Cmd) :
 	    askAgainQuickList.pop(0)
 	    self.quickAsk = -1 if (len(askAgainQuickList) == 0) else quickWaitCycles
 	else :
-            if len(quizList) == 0 :
-                self.prompt = 'finished quiz '
-                self.quizState = ASK_CONTINUE
-                return False
-
+            growQuizList()
 	    self.root       = quizList[-1][ROOT]
 	    self.exponent   = quizList[-1][EXP]
 	    self.power      = quizList[-1][POWER]
@@ -309,25 +320,6 @@ class powersQuiz(cmd.Cmd) :
 	    print "Unknown command. Try 'help'"
     
     def precmd(self, line):
-        if fqListInd >= len(fullQuizList) :
-            if len(quizList) == 0 :
-                growQuizList()
-                i = 0
-                while i < len(quizList) :
-                    quizList[i][SHUFFLE] = random.random()
-                    i += 1
-                quizList.sort(key=itemgetter(SHUFFLE))
-
-        elif len(quizList) < maxQListSize/2 :
-            while len(quizList) < maxQListSize :
-                if not growQuizList() :
-                    break
-            i = 0
-            while i < len(quizList) :
-                quizList[i][SHUFFLE] = random.random()
-                i += 1
-            quizList.sort(key=itemgetter(SHUFFLE))
-
 	return cmd.Cmd.precmd(self, line)
     
     def postcmd(self, stop, line):
@@ -458,16 +450,7 @@ def main():
 
     random.seed()
 
-    global fqListInd
-    while fqListInd < len(fullQuizList) and len(quizList) < maxQListSize :
-        growQuizList()
-    i = 0
-    while i < len(quizList) :
-        quizList[i][SHUFFLE] = random.random()
-        i += 1
-    quizList.sort(key=itemgetter(SHUFFLE))
-    ### printQuizList()
-
+    growQuizList()
     powersQuiz().cmdloop()
     sys.exit(0)
 
