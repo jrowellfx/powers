@@ -204,12 +204,11 @@ class powersQuiz(cmd.Cmd) :
 		    0.0, self.askForRoot])
 	    if self.quickAsk < 0 :
 		self.quickAsk = quickWaitCycles
-	    print self.correctAnswer
-            print answerDict[self.qStr]
 	    self.prompt = 'continue? '
 	    self.quizState = ASK_CONTINUE
     
     def default(self, line):
+        userAnswer = 0
 	if self.quizState == GET_ANSWER :
 	    self.endTime = time.time()
 	    try :
@@ -241,8 +240,6 @@ class powersQuiz(cmd.Cmd) :
                         0.0, self.askForRoot], ((self.endTime - self.startTime), \
 			(userAnswer == self.correctAnswer))]
 
-                print answerDict[self.qStr]
-
                 self.startTime = time.time()
 	else :
 	    print "Unknown command. Try 'help'"
@@ -256,11 +253,6 @@ class powersQuiz(cmd.Cmd) :
                     quizList[i][SHUFFLE] = random.random()
                     i += 1
                 quizList.sort(key=itemgetter(SHUFFLE))
-                print "in precmd"
-                for key in answerDict :
-                    print key
-                    print answerDict[key]
-                printQuizList()
 
         elif len(quizList) < maxQListSize/2 :
             while len(quizList) < maxQListSize :
@@ -271,12 +263,19 @@ class powersQuiz(cmd.Cmd) :
                 quizList[i][SHUFFLE] = random.random()
                 i += 1
             quizList.sort(key=itemgetter(SHUFFLE))
-            print "in precmd"
-            printQuizList()
 
 	return cmd.Cmd.precmd(self, line)
     
     def postcmd(self, stop, line):
+        '''
+	print '***postcmd***'
+        print "answerDict..."
+        for key in answerDict :
+            print key
+            print answerDict[key]
+        print "quizList..."
+        printQuizList()
+        '''
 	print ''
 	return cmd.Cmd.postcmd(self, stop, line)
     
@@ -382,7 +381,7 @@ def main():
 		continue
             fullQuizList.append((r, e, x))
     fullQuizList.sort(key=itemgetter(POWER))
-    print fullQuizList
+    ### print fullQuizList
 
     random.seed()
 
@@ -394,7 +393,7 @@ def main():
         quizList[i][SHUFFLE] = random.random()
         i += 1
     quizList.sort(key=itemgetter(SHUFFLE))
-    printQuizList()
+    ### printQuizList()
 
     powersQuiz().cmdloop()
     sys.exit(0)
