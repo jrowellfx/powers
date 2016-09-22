@@ -100,7 +100,7 @@ def getSlowestAnswers(n) :
 # Test this case and debug.... 
 #   quizPowers -n `expandseq -d space 2-16` -m 53 --limit 1
 #
-def quizListGrow() :
+def growQuizList() :
     global fqListInd
     global quizList
 
@@ -115,16 +115,20 @@ def quizListGrow() :
         fqListInd += 1
         return True
 
-    # Grows up to max size of quizList
+    # Grows up to max size of quizList if quizList is empty
     #
-    else :
-        extraQuestions = []
-        if len(quizList) < maxQListSize :
-            extraQuestions = getSlowestAnswers(maxQListSize - len(quizList))
-
-        quizList = quizList + extraQuestions
-
+    elif len(quizList) == 0 :
+        extraQuestions = getSlowestAnswers(maxQListSize)
+        quizList = extraQuestions
         return len(extraQuestions) > 0
+
+    else :
+        return False
+
+def printQuizList() :
+    global quizList
+    for q in quizList :
+        print q
 
 class powersQuiz(cmd.Cmd) :
     'quiz user on powers of integers'
@@ -154,7 +158,7 @@ class powersQuiz(cmd.Cmd) :
 	    self.power      = askAgainQuickList[0][POWER]
 	    self.askForRoot = askAgainQuickList[0][ASK_FOR_ROOT]
 	    askAgainQuickList.pop(0)
-	    self.quickAsk = -1 if len(askAgainQuickList) <= 0 else quickWaitCycles
+	    self.quickAsk = -1 if (len(askAgainQuickList) == 0) else quickWaitCycles
 	else :
             if len(quizList) == 0 :
                 self.prompt = 'finished quiz '
@@ -246,14 +250,15 @@ class powersQuiz(cmd.Cmd) :
     def precmd(self, line):
         if len(quizList) < maxQListSize/2  :
             while len(quizList) < maxQListSize :
-                if not quizListGrow() :
+                if not growQuizList() :
                     break
             i = 0
             while i < len(quizList) :
                 quizList[i][SHUFFLE] = random.random()
                 i += 1
             quizList.sort(key=itemgetter(SHUFFLE))
-            print quizList
+            print "in precmd"
+            printQuizList()
 	return cmd.Cmd.precmd(self, line)
     
     def postcmd(self, stop, line):
@@ -265,7 +270,9 @@ class powersQuiz(cmd.Cmd) :
         fqListInd = 0
     
     def do_stats(self, line) :
-        print answerDict
+        for key in answerDict :
+            print key
+            print answerDict[key]
 
     def do_EOF(self, line):
 	"Exit"
@@ -366,13 +373,13 @@ def main():
 
     global fqListInd
     while fqListInd < len(fullQuizList) and len(quizList) < maxQListSize :
-        quizListGrow()
+        growQuizList()
     i = 0
     while i < len(quizList) :
         quizList[i][SHUFFLE] = random.random()
         i += 1
     quizList.sort(key=itemgetter(SHUFFLE))
-    print quizList
+    printQuizList()
 
     powersQuiz().cmdloop()
     sys.exit(0)
