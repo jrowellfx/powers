@@ -1,0 +1,121 @@
+{
+  "2^2": [
+    [
+      2,
+      2,
+      4,
+      0.0,
+      false
+    ],
+    [
+      1.8560149669647217,
+      true
+    ],
+    [
+      1.5837290287017822,
+      true
+    ],
+    [
+      2.1199090480804443,
+      true
+    ]
+  ],
+  "2^3": [
+    [
+      2,
+      3,
+      8,
+      0.0,
+      false
+    ],
+    [
+      1.720015048980713,
+      true
+    ],
+    [
+      1.7440857887268066,
+      true
+    ],
+    [
+      1.81607985496521,
+      true
+    ]
+  ],
+  "4^(1/2)": [
+    [
+      2,
+      2,
+      4,
+      0.0,
+      true
+    ],
+    [
+      1.080030918121338,
+      true
+    ],
+    [
+      1.5360679626464844,
+      true
+    ]
+  ],
+  "8^(1/3)": [
+    [
+      2,
+      3,
+      8,
+      0.0,
+      true
+    ],
+    [
+      3.071845054626465,
+      true
+    ],
+    [
+      1.4640209674835205,
+      true
+    ]
+  ],
+  "askAgainDelayList": [],
+  "askAgainQuickList": [],
+  "fqListInd": 2,
+  "fullQuizList": [
+    [
+      2,
+      2,
+      4
+    ],
+    [
+      2,
+      3,
+      8
+    ]
+  ],
+  "quizList": [
+    [
+      2,
+      2,
+      4,
+      0.05144780121507786,
+      true
+    ],
+    [
+      2,
+      3,
+      8,
+      0.6040931078751473,
+      true
+    ]
+  ],
+  "self.askForRoot": false,
+  "self.correctAnswer": 8,
+  "self.endTime": 1474584731.32403,
+  "self.exponent": 3,
+  "self.lastWasWrong": false,
+  "self.power": 8,
+  "self.prompt": "continue? ",
+  "self.qStr": "2^3",
+  "self.quickAsk": -1,
+  "self.quizState": 0,
+  "self.root": 2,
+  "self.startTime": 1474584731.324064
+}
