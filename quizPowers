@@ -10,6 +10,8 @@ import random
 import math
 from operator import itemgetter
 import cmd
+import json
+import yaml
 
 ROOT = 0
 EXP = 1
@@ -24,23 +26,57 @@ ASK_CONTINUE = 0
 GET_ANSWER = 1
 
 kEpsilon = 1.0e-12
-fqListInd = 0
 
 quickWaitCycles = 3
 delayWaitCycles = 7
-
-quizList = []
-fullQuizList = []
-rootList = []
-powerList = []
-askAgainQuickList = []
-askAgainDelayList = []
 
 # Make sure this is an even number
 #
 maxQListSize = 8
 
+# Temporary filename for saving state
+#
+saveStateFile = "quizPowers.json"
+
+# Global vars
+#
+quizList = []
+fullQuizList = []
+askAgainQuickList = []
+askAgainDelayList = []
 answerDict = {}
+fqListInd = 0
+
+'''
+def json_load_byteified(file_handle):
+    return _byteify(
+        json.load(file_handle, object_hook=_byteify),
+        ignore_dicts=True
+    )
+
+def json_loads_byteified(json_text):
+    return _byteify(
+        json.loads(json_text, object_hook=_byteify),
+        ignore_dicts=True
+    )
+
+def _byteify(data, ignore_dicts = False):
+    # if this is a unicode string, return its string representation
+    if isinstance(data, unicode):
+        return data.encode('utf-8')
+    # if this is a list of values, return list of byteified values
+    if isinstance(data, list):
+        return [ _byteify(item, ignore_dicts=True) for item in data ]
+    # if this is a dictionary, return dictionary of byteified keys and values
+    # but only if we haven't already byteified it
+    if isinstance(data, dict) and not ignore_dicts:
+        return {
+            _byteify(key, ignore_dicts=True): _byteify(value, ignore_dicts=True)
+            for key, value in data.iteritems()
+        }
+    # if it's anything else, return it in its original form
+    return data
+'''
 
 def stndNormDist(x) :
     return 1.0/math.sqrt(math.pow(math.e, x*x))
@@ -150,6 +186,66 @@ class powersQuiz(cmd.Cmd) :
 	self.quickAsk = -1
 
         cmd.Cmd.__init__(self)
+
+    def readState(self) :
+        global quizList
+        global fullQuizList
+        global askAgainQuickList
+        global askAgainDelayList
+        global answerDict
+        global fqListInd
+
+        with open(saveStateFile, 'r') as f :
+            data = json.load(f)
+
+        dumpDict = yaml.safe_load(data)
+        # print type(dumpDict)
+
+        quizList = dumpDict.pop("quizList")
+        fullQuizList = dumpDict.pop("fullQuizList")
+        askAgainQuickList = dumpDict.pop("askAgainQuickList")
+        askAgainDelayList = dumpDict.pop("askAgainDelayList")
+        fqListInd = dumpDict.pop("fqListInd")
+        #
+        self.startTime = dumpDict.pop("self.startTime")
+        self.endTime = dumpDict.pop("self.endTime")
+        self.root = dumpDict.pop("self.root")
+        self.exponent = dumpDict.pop("self.exponent")
+        self.power = dumpDict.pop("self.power")
+        self.askForRoot = dumpDict.pop("self.askForRoot")
+        self.correctAnswer = dumpDict.pop("self.correctAnswer")
+        self.qStr = dumpDict.pop("self.qStr")
+        self.lastWasWrong = dumpDict.pop("self.lastWasWrong")
+        self.prompt = dumpDict.pop("self.prompt")
+        self.quizState = dumpDict.pop("self.quizState")
+        self.quickAsk = dumpDict.pop("self.quickAsk")
+
+        answerDict = dumpDict
+
+    def writeState(self) :
+        dumpDict = answerDict
+        dumpDict["quizList"] = quizList
+        dumpDict["fullQuizList"] = fullQuizList
+        dumpDict["askAgainQuickList"] = askAgainQuickList
+        dumpDict["askAgainDelayList"] = askAgainDelayList
+        dumpDict["fqListInd"] = fqListInd
+        #
+	dumpDict["self.startTime"] = self.startTime
+	dumpDict["self.endTime"] = self.endTime
+	dumpDict["self.root"] = self.root
+        dumpDict["self.exponent"] = self.exponent
+	dumpDict["self.power"] = self.power
+	dumpDict["self.askForRoot"] = self.askForRoot
+	dumpDict["self.correctAnswer"] = self.correctAnswer
+        dumpDict["self.qStr"] = self.qStr
+	dumpDict["self.lastWasWrong"] = self.lastWasWrong
+        dumpDict["self.prompt"] = self.prompt
+	dumpDict["self.quizState"] = self.quizState
+	dumpDict["self.quickAsk"] = self.quickAsk
+
+        jQuiz = json.dumps(dumpDict, ensure_ascii=False)
+        with open(saveStateFile, 'w') as f :
+                json.dump(jQuiz, f)
 
     def getNextQuestion(self) :
 	if self.quickAsk == 0 :
@@ -288,6 +384,12 @@ class powersQuiz(cmd.Cmd) :
             print key
             print answerDict[key]
 
+    def do_write(self, line) :
+        self.writeState()
+
+    def do_read(self, line) :
+        self.readState()
+
     def do_EOF(self, line):
 	"Exit"
 	return True
@@ -327,6 +429,9 @@ def main():
 	help="Limit testing powers to integers of length MAX-digits or less")
 
     args = p.parse_args()
+
+    rootList = []
+    powerList = []
 
     if type(args.n) == int :
         powerList = [ args.n ]

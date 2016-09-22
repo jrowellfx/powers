@@ -2,8 +2,7 @@
 
 import sys
 import json
-import ast
-import io
+import yaml
 
 def main():
 
@@ -25,20 +24,34 @@ def main():
 
     print ""
     print "testDict"
+    print type(testDict)
     print testDict
 
     jTest = json.dumps(testDict, ensure_ascii=False)
     print "json data"
+    print type(jTest)
     print jTest
+
+    # a_loadedDict = yaml.safe_load(f)
 
     with open('testout.json', 'w') as f :
         json.dump(jTest, f)
 
     with open('testout.json', 'r') as f :
         data = json.load(f)
-    a_loadedDict = ast.literal_eval(data)
     print "After reading file"
+    print type(data)
+    print data
+
+    a_loadedDict = yaml.safe_load(data)
+    print type(a_loadedDict)
     print a_loadedDict
+
+    # with open('testout.json', 'r') as f :
+        # data = json.load(f)
+    # a_loadedDict = ast.literal_eval(data)
+    # print "After reading file"
+    # print a_loadedDict
 
     # j_loadedDict = json.loads(jTest)
     # print j_loadedDict
