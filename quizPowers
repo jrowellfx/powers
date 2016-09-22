@@ -58,6 +58,7 @@ def genWeights(n) :
 
 def weightedAvg(list) :
     weights = genWeights(len(list))
+
     wList = []
     i = 0
     while i < len(list) :
@@ -71,18 +72,18 @@ def rootQ(power, expn) :
 def powerQ(root, expn) :
     return str(root) + '^' + str(expn)
 
-getSlowestAnswers (n) :
+def getSlowestAnswers(n) :
     if n <= 0 :
         return []
 
     qList = []
-    times = []
     for key in answerDict :
-        qList.append(answerDict[key][1])
+        qList.append(answerDict[key][0])
+        times = []
         i = 1
         while i < len(answerDict[key]) :
-            if answerDict[key][WAS_CORRECT] :
-                times.append(answerDict[key][WAS_CORRECT])
+            if answerDict[key][i][WAS_CORRECT] :
+                times.append(answerDict[key][i][ANSWER_TIME])
             i += 1
         if times == [] :
             qList.pop()
@@ -99,18 +100,31 @@ getSlowestAnswers (n) :
 # Test this case and debug.... 
 #   quizPowers -n `expandseq -d space 2-16` -m 53 --limit 1
 #
-def quizListGrow() : # Grows quizList by two elements.
+def quizListGrow() :
     global fqListInd
+    global quizList
+
+    # Grows quizList by two elements.
+    #
     if fqListInd < len(fullQuizList) :
         r = fullQuizList[fqListInd][ROOT]
         e = fullQuizList[fqListInd][EXP]
         x = fullQuizList[fqListInd][POWER]
-        quizList.append([r, e, x, random.random(), True])
-        quizList.append([r, e, x, random.random(), False])
+        quizList.append([r, e, x, 0.0, True])
+        quizList.append([r, e, x, 0.0, False])
         fqListInd += 1
         return True
+
+    # Grows up to max size of quizList
+    #
     else :
-        return False
+        extraQuestions = []
+        if len(quizList) < maxQListSize :
+            extraQuestions = getSlowestAnswers(maxQListSize - len(quizList))
+
+        quizList = quizList + extraQuestions
+
+        return len(extraQuestions) > 0
 
 class powersQuiz(cmd.Cmd) :
     'quiz user on powers of integers'
@@ -353,6 +367,10 @@ def main():
     global fqListInd
     while fqListInd < len(fullQuizList) and len(quizList) < maxQListSize :
         quizListGrow()
+    i = 0
+    while i < len(quizList) :
+        quizList[i][SHUFFLE] = random.random()
+        i += 1
     quizList.sort(key=itemgetter(SHUFFLE))
     print quizList
 
