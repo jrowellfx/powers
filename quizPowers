@@ -12,6 +12,7 @@ from operator import itemgetter
 import cmd
 import json
 import yaml
+import copy
 
 ROOT = 0
 EXP = 1
@@ -46,37 +47,6 @@ askAgainQuickList = []
 askAgainDelayList = []
 answerDict = {}
 fqListInd = 0
-
-'''
-def json_load_byteified(file_handle):
-    return _byteify(
-        json.load(file_handle, object_hook=_byteify),
-        ignore_dicts=True
-    )
-
-def json_loads_byteified(json_text):
-    return _byteify(
-        json.loads(json_text, object_hook=_byteify),
-        ignore_dicts=True
-    )
-
-def _byteify(data, ignore_dicts = False):
-    # if this is a unicode string, return its string representation
-    if isinstance(data, unicode):
-        return data.encode('utf-8')
-    # if this is a list of values, return list of byteified values
-    if isinstance(data, list):
-        return [ _byteify(item, ignore_dicts=True) for item in data ]
-    # if this is a dictionary, return dictionary of byteified keys and values
-    # but only if we haven't already byteified it
-    if isinstance(data, dict) and not ignore_dicts:
-        return {
-            _byteify(key, ignore_dicts=True): _byteify(value, ignore_dicts=True)
-            for key, value in data.iteritems()
-        }
-    # if it's anything else, return it in its original form
-    return data
-'''
 
 def stndNormDist(x) :
     return 1.0/math.sqrt(math.pow(math.e, x*x))
@@ -114,7 +84,7 @@ def getSlowestAnswers(n) :
 
     qList = []
     for key in answerDict :
-        qList.append(answerDict[key][0])
+        qList.append(list(answerDict[key][0]))
         times = []
         i = 1
         while i < len(answerDict[key]) :
@@ -133,9 +103,6 @@ def getSlowestAnswers(n) :
 
     return qList[:n]
 
-# Test this case and debug.... 
-#   quizPowers -n `expandseq -d space 2-16` -m 53 --limit 1
-#
 def growQuizList() :
     global fqListInd
     global quizList
@@ -196,10 +163,8 @@ class powersQuiz(cmd.Cmd) :
         global fqListInd
 
         with open(saveStateFile, 'r') as f :
-            data = json.load(f)
-
-        dumpDict = yaml.safe_load(data)
-        # print type(dumpDict)
+            qQuiz = f.read()
+        dumpDict = yaml.safe_load(qQuiz)
 
         quizList = dumpDict.pop("quizList")
         fullQuizList = dumpDict.pop("fullQuizList")
@@ -223,7 +188,8 @@ class powersQuiz(cmd.Cmd) :
         answerDict = dumpDict
 
     def writeState(self) :
-        dumpDict = answerDict
+        dumpDict = copy.deepcopy(answerDict)
+
         dumpDict["quizList"] = quizList
         dumpDict["fullQuizList"] = fullQuizList
         dumpDict["askAgainQuickList"] = askAgainQuickList
@@ -243,9 +209,9 @@ class powersQuiz(cmd.Cmd) :
 	dumpDict["self.quizState"] = self.quizState
 	dumpDict["self.quickAsk"] = self.quickAsk
 
-        jQuiz = json.dumps(dumpDict, ensure_ascii=False)
+        jQuiz = json.dumps(dumpDict, ensure_ascii=False, sort_keys=True, indent=2, separators=(',',': '))
         with open(saveStateFile, 'w') as f :
-                json.dump(jQuiz, f)
+            f.write(jQuiz)
 
     def getNextQuestion(self) :
 	if self.quickAsk == 0 :
@@ -283,6 +249,7 @@ class powersQuiz(cmd.Cmd) :
         return True
 
     def emptyline(self):
+        global answerDict
 	if self.quizState == ASK_CONTINUE :
 	    self.getNextQuestion()
 	    self.startTime = time.time()
@@ -305,6 +272,7 @@ class powersQuiz(cmd.Cmd) :
     
     def default(self, line):
         userAnswer = 0
+        global answerDict
 	if self.quizState == GET_ANSWER :
 	    self.endTime = time.time()
 	    try :
@@ -363,7 +331,6 @@ class powersQuiz(cmd.Cmd) :
 	return cmd.Cmd.precmd(self, line)
     
     def postcmd(self, stop, line):
-        '''
 	print '***postcmd***'
         print "answerDict..."
         for key in answerDict :
@@ -371,6 +338,7 @@ class powersQuiz(cmd.Cmd) :
             print answerDict[key]
         print "quizList..."
         printQuizList()
+        '''
         '''
 	print ''
 	return cmd.Cmd.postcmd(self, stop, line)

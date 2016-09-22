@@ -37,6 +37,7 @@ def main():
     with open('testout.json', 'w') as f :
         json.dump(jTest, f)
 
+    print "about to open file and json.load it"
     with open('testout.json', 'r') as f :
         data = json.load(f)
     print "After reading file"
@@ -46,23 +47,6 @@ def main():
     a_loadedDict = yaml.safe_load(data)
     print type(a_loadedDict)
     print a_loadedDict
-
-    # with open('testout.json', 'r') as f :
-        # data = json.load(f)
-    # a_loadedDict = ast.literal_eval(data)
-    # print "After reading file"
-    # print a_loadedDict
-
-    # j_loadedDict = json.loads(jTest)
-    # print j_loadedDict
-
-    # a_loadedDict = ast.literal_eval(jTest)
-    # with open('testout.json', 'r') as infile :
-        # a_loadedDict = ast.literal_eval(infile)
-    # print "loaded jTest"
-    # print a_loadedDict
-
-    # sys.exit(0)
         
 if __name__ == '__main__':
     main()
