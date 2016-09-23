@@ -181,7 +181,7 @@ class powersQuiz(cmd.Cmd) :
             qQuiz = f.read()
         dumpDict = yaml.safe_load(qQuiz)
 
-        quizList = dumpDict.pop("quizList")
+        quizList = list(set(dumpDict.pop("quizList") + quizList)
         fullQuizList = dumpDict.pop("fullQuizList")
         askAgainQuickList = dumpDict.pop("askAgainQuickList")
         askAgainDelayList = dumpDict.pop("askAgainDelayList")
