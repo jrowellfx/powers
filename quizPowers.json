@@ -8,15 +8,11 @@
       false
     ],
     [
-      1.8560149669647217,
+      4.216054916381836,
       true
     ],
     [
-      1.5837290287017822,
-      true
-    ],
-    [
-      2.1199090480804443,
+      1.9199070930480957,
       true
     ]
   ],
@@ -29,15 +25,11 @@
       false
     ],
     [
-      1.720015048980713,
+      2.4638290405273438,
       true
     ],
     [
-      1.7440857887268066,
-      true
-    ],
-    [
-      1.81607985496521,
+      1.9039909839630127,
       true
     ]
   ],
@@ -50,11 +42,11 @@
       true
     ],
     [
-      1.080030918121338,
+      2.087980031967163,
       true
     ],
     [
-      1.5360679626464844,
+      5.640004873275757,
       true
     ]
   ],
@@ -67,18 +59,17 @@
       true
     ],
     [
-      3.071845054626465,
+      1.7919681072235107,
       true
     ],
     [
-      1.4640209674835205,
+      5.311908960342407,
       true
     ]
   ],
   "askAgainDelayList": [],
   "askAgainQuickList": [],
-  "fqListInd": 2,
-  "fullQuizList": [
+  "askedItems": [
     [
       2,
       2,
@@ -90,32 +81,8 @@
       8
     ]
   ],
+  "fullQuizList": [],
   "quizList": [
-    [
-      2,
-      2,
-      4,
-      0.05144780121507786,
-      true
-    ],
-    [
-      2,
-      3,
-      8,
-      0.6040931078751473,
-      true
-    ]
-  ],
-  "self.askForRoot": false,
-  "self.correctAnswer": 8,
-  "self.endTime": 1474584731.32403,
-  "self.exponent": 3,
-  "self.lastWasWrong": false,
-  "self.power": 8,
-  "self.prompt": "continue? ",
-  "self.qStr": "2^3",
-  "self.quickAsk": -1,
-  "self.quizState": 0,
-  "self.root": 2,
-  "self.startTime": 1474584731.324064
+    []
+  ]
 }
