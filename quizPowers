@@ -41,12 +41,12 @@ saveStateFile = "quizPowers.json"
 
 # Global vars
 #
-quizList = []
 fullQuizList = []
+askedItems = []
+quizList = []
 askAgainQuickList = []
 askAgainDelayList = []
 answerDict = {}
-fqListInd = 0
 
 def stndNormDist(x) :
     return 1.0/math.sqrt(math.pow(math.e, x*x))
@@ -104,22 +104,22 @@ def getSlowestAnswers(n) :
     return qList[:n]
 
 def growQuizList() :
-    global fqListInd
+    global askedItems
     global quizList
 
     # If there are powers in the full list that have not
     # been asked yet draw questions from those.
     #
-    if fqListInd < len(fullQuizList) :
+    if len(fullQuizList) > 0 :
 
         if len(quizList) < maxQListSize/2 :
-            while len(quizList) < maxQListSize and fqListInd < len(fullQuizList) :
-                r = fullQuizList[fqListInd][ROOT]
-                e = fullQuizList[fqListInd][EXP]
-                x = fullQuizList[fqListInd][POWER]
+            while len(quizList) < maxQListSize and len(fullQuizList) > 0 :
+                r = fullQuizList[-1][ROOT]
+                e = fullQuizList[-1][EXP]
+                x = fullQuizList[-1][POWER]
+		askedItems.append(fullQuizList.pop())
                 quizList.append([r, e, x, 0.0, True])
                 quizList.append([r, e, x, 0.0, False])
-                fqListInd += 1
             i = 0
             while i < len(quizList) :
                 quizList[i][SHUFFLE] = random.random()
@@ -169,47 +169,14 @@ class powersQuiz(cmd.Cmd) :
 
         cmd.Cmd.__init__(self)
 
-    def readState(self) :
-        global quizList
-        global fullQuizList
-        global askAgainQuickList
-        global askAgainDelayList
-        global answerDict
-        global fqListInd
-
-        with open(saveStateFile, 'r') as f :
-            qQuiz = f.read()
-        dumpDict = yaml.safe_load(qQuiz)
-
-        quizList = list(set(dumpDict.pop("quizList") + quizList)
-        fullQuizList = dumpDict.pop("fullQuizList")
-        askAgainQuickList = dumpDict.pop("askAgainQuickList")
-        askAgainDelayList = dumpDict.pop("askAgainDelayList")
-        fqListInd = dumpDict.pop("fqListInd")
-        #
-        self.startTime = dumpDict.pop("self.startTime")
-        self.endTime = dumpDict.pop("self.endTime")
-        self.root = dumpDict.pop("self.root")
-        self.exponent = dumpDict.pop("self.exponent")
-        self.power = dumpDict.pop("self.power")
-        self.askForRoot = dumpDict.pop("self.askForRoot")
-        self.correctAnswer = dumpDict.pop("self.correctAnswer")
-        self.qStr = dumpDict.pop("self.qStr")
-        self.lastWasWrong = dumpDict.pop("self.lastWasWrong")
-        self.prompt = dumpDict.pop("self.prompt")
-        self.quizState = dumpDict.pop("self.quizState")
-        self.quickAsk = dumpDict.pop("self.quickAsk")
-
-        answerDict = dumpDict
-
     def writeState(self) :
         dumpDict = copy.deepcopy(answerDict)
 
-        dumpDict["quizList"] = quizList
         dumpDict["fullQuizList"] = fullQuizList
+        dumpDict["askedItems"] = askedItems
+        dumpDict["quizList"] = quizList
         dumpDict["askAgainQuickList"] = askAgainQuickList
         dumpDict["askAgainDelayList"] = askAgainDelayList
-        dumpDict["fqListInd"] = fqListInd
         #
 	dumpDict["self.startTime"] = self.startTime
 	dumpDict["self.endTime"] = self.endTime
@@ -227,6 +194,75 @@ class powersQuiz(cmd.Cmd) :
         jQuiz = json.dumps(dumpDict, ensure_ascii=False, sort_keys=True, indent=2, separators=(',',': '))
         with open(saveStateFile, 'w') as f :
             f.write(jQuiz)
+
+    def readState(self) :
+        global fullQuizList
+        global askedItems
+        global quizList
+        global askAgainQuickList
+        global askAgainDelayList
+        global answerDict
+
+        with open(saveStateFile, 'r') as f :
+            qQuiz = f.read()
+        dumpDict = yaml.safe_load(qQuiz)
+
+        fullQuizList = dumpDict.pop("fullQuizList")
+        askedItems = dumpDict.pop("askedItems")
+        quizList = dumpDict.pop("quizList")
+        askAgainQuickList = dumpDict.pop("askAgainQuickList")
+        askAgainDelayList = dumpDict.pop("askAgainDelayList")
+        #
+        self.startTime = dumpDict.pop("self.startTime")
+        self.endTime = dumpDict.pop("self.endTime")
+        self.root = dumpDict.pop("self.root")
+        self.exponent = dumpDict.pop("self.exponent")
+        self.power = dumpDict.pop("self.power")
+        self.askForRoot = dumpDict.pop("self.askForRoot")
+        self.correctAnswer = dumpDict.pop("self.correctAnswer")
+        self.qStr = dumpDict.pop("self.qStr")
+        self.lastWasWrong = dumpDict.pop("self.lastWasWrong")
+        self.prompt = dumpDict.pop("self.prompt")
+        self.quizState = dumpDict.pop("self.quizState")
+        self.quickAsk = dumpDict.pop("self.quickAsk")
+
+        answerDict = dumpDict
+
+    def mergeState(self) :
+        global fullQuizList
+        global askedItems
+        global quizList
+        global askAgainQuickList
+        global askAgainDelayList
+        global answerDict
+
+        with open(saveStateFile, 'r') as f :
+            qQuiz = f.read()
+        dumpDict = yaml.safe_load(qQuiz)
+
+	locFullQuizList = dumpDict.pop("fullQuizList")
+	for q in locFullQuizList :
+	    if not (q in fullQuizList) :
+		fullQuizList.append(q)
+
+        quizList = dumpDict.pop("quizList")
+        askAgainQuickList = dumpDict.pop("askAgainQuickList")
+        askAgainDelayList = dumpDict.pop("askAgainDelayList")
+        #
+        self.startTime = dumpDict.pop("self.startTime")
+        self.endTime = dumpDict.pop("self.endTime")
+        self.root = dumpDict.pop("self.root")
+        self.exponent = dumpDict.pop("self.exponent")
+        self.power = dumpDict.pop("self.power")
+        self.askForRoot = dumpDict.pop("self.askForRoot")
+        self.correctAnswer = dumpDict.pop("self.correctAnswer")
+        self.qStr = dumpDict.pop("self.qStr")
+        self.lastWasWrong = dumpDict.pop("self.lastWasWrong")
+        self.prompt = dumpDict.pop("self.prompt")
+        self.quizState = dumpDict.pop("self.quizState")
+        self.quickAsk = dumpDict.pop("self.quickAsk")
+
+        answerDict = dumpDict
 
     def getNextQuestion(self) :
 	if self.quickAsk == 0 :
@@ -336,8 +372,8 @@ class powersQuiz(cmd.Cmd) :
 	return cmd.Cmd.postcmd(self, stop, line)
     
     def do_repeat(self, line) :
-        global fqListInd
-        fqListInd = 0
+        fullQuizList = askedItems
+        fullQuizList.reverse
     
     def do_stats(self, line) :
         for key in answerDict :
@@ -349,6 +385,9 @@ class powersQuiz(cmd.Cmd) :
 
     def do_read(self, line) :
         self.readState()
+
+    def do_merge(self, line) :
+        self.mergeState()
 
     def do_EOF(self, line):
 	"Exit"
@@ -446,6 +485,7 @@ def main():
 		continue
             fullQuizList.append((r, e, x))
     fullQuizList.sort(key=itemgetter(POWER))
+    fullQuizList.reverse()
     ### print fullQuizList
 
     random.seed()
