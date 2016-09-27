@@ -184,15 +184,16 @@ class powersQuiz(cmd.Cmd) :
 	self.growQuizList()
 
     def writeState(self) :
-        dumpDict = copy.deepcopy(answerDict)
 
-	if self.currentQ == [] :
+	if self.currentQ != [] :
 	    quizList.append(self.currentQ)
+
 	self.lastWasWrong = False
 	self.currentQ = []
 	self.prompt = 'continue? '
 	self.quizState = ASK_CONTINUE
 
+        dumpDict = copy.deepcopy(answerDict)
         dumpDict["fullQuizList"] = fullQuizList
         dumpDict["askedItems"] = askedItems
         dumpDict["quizList"] = quizList
@@ -213,6 +214,7 @@ class powersQuiz(cmd.Cmd) :
 
         with open(saveStateFile, 'r') as f :
             qQuiz = f.read()
+
         dumpDict = yaml.safe_load(qQuiz)
 
         fullQuizList = dumpDict.pop("fullQuizList")
@@ -226,7 +228,8 @@ class powersQuiz(cmd.Cmd) :
 	self.currentQ = []
 	self.prompt = 'continue? '
 	self.quizState = ASK_CONTINUE
-	self.quickAsk = quickWaitCycles
+        if askAgainQuickList != [] :
+            self.quickAsk = quickWaitCycles
 
     def mergeState(self) :
         global fullQuizList
