@@ -224,13 +224,15 @@ class powersQuiz(cmd.Cmd) :
         quizList = dumpDict.pop("quizList")
         askAgainQuickList = dumpDict.pop("askAgainQuickList")
         askAgainDelayList = dumpDict.pop("askAgainDelayList")
+	locAnswerDict = {}
 	for key in dumpDict :
 	    locAnswerDict[key] = [dumpDict[key][0]]
 	    i = 1
 	    while i < len(dumpDict[key]) :
 		locAnswerDict[key].append( \
-		    (dumpDict[key][0][0], dumpDict[key][0][1], dumpDict[key][0][2]))
+		    (dumpDict[key][i][0], dumpDict[key][i][1], dumpDict[key][i][2]))
 		i += 1
+	answerDict = locAnswerDict
 
 	self.lastWasWrong = False
 	self.currentQ = []
@@ -275,7 +277,7 @@ class powersQuiz(cmd.Cmd) :
 		fullQuizList.remvove(q)
 
 	for q in locFullQuizList :
-	    if not (q in fullQuizList or q in answerList) :
+	    if not (q in fullQuizList or q in askedItems) :
 		fullQuizList.append(q)
 
 	for q in locQuizList :
@@ -301,7 +303,6 @@ class powersQuiz(cmd.Cmd) :
 		q = answerDict[key][0]
 		ansList = copy.deepcopy(answerDict[key])
 		ansList.pop(0)
-		print ansList
 		s1 = Set(ansList)
 
 		locAnsList = []
@@ -311,7 +312,6 @@ class powersQuiz(cmd.Cmd) :
 			(dumpDict[key][i][0], dumpDict[key][i][1], dumpDict[key][i][2]))
 		    i += 1
 
-		print locAnsList
 		s2 = Set(locAnsList)
 		newAnsList = sorted(s1 | s2)
 		newAnsList.insert(0, q)
@@ -358,6 +358,7 @@ class powersQuiz(cmd.Cmd) :
 		askAgainQuickList.append( \
 		    [self.root, self.exponent, self.power, \
 		    0.0, self.askForRoot])
+	    print "--- " + self.qStr + " is " + str(self.correctAnswer) + " ---"
 	    if self.quickAsk < 0 :
 		self.quickAsk = quickWaitCycles
 	    self.lastWasWrong = False
@@ -412,6 +413,7 @@ class powersQuiz(cmd.Cmd) :
 	return cmd.Cmd.precmd(self, line)
     
     def postcmd(self, stop, line):
+        '''
 	print '***postcmd***'
         print "answerDict..."
         for key in answerDict :
@@ -419,7 +421,6 @@ class powersQuiz(cmd.Cmd) :
             print answerDict[key]
         print "quizList..."
         printQuizList()
-        '''
         '''
 	print ''
 	return cmd.Cmd.postcmd(self, stop, line)
