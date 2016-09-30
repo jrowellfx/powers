@@ -13,6 +13,7 @@ import cmd
 import json
 import yaml
 import copy
+from sets import Set
 
 ROOT = 0
 EXP = 1
@@ -20,8 +21,9 @@ POWER = 2
 SHUFFLE = 3
 ASK_FOR_ROOT = 4
 
-ANSWER_TIME = 0
-WAS_CORRECT = 1
+ANSWER_START = 0
+ANSWER_TIME  = 1
+WAS_CORRECT  = 2
 
 ASK_CONTINUE = 0
 GET_ANSWER = 1
@@ -84,7 +86,7 @@ def getSlowestAnswers(n) :
 
     qList = []
     for key in answerDict :
-        qList.append(list(answerDict[key][0]))
+        qList.append(copy.deepcopy(answerDict[key][0]))
         times = []
         i = 1
         while i < len(answerDict[key]) :
@@ -222,7 +224,13 @@ class powersQuiz(cmd.Cmd) :
         quizList = dumpDict.pop("quizList")
         askAgainQuickList = dumpDict.pop("askAgainQuickList")
         askAgainDelayList = dumpDict.pop("askAgainDelayList")
-        answerDict = dumpDict
+	for key in dumpDict :
+	    locAnswerDict[key] = [dumpDict[key][0]]
+	    i = 1
+	    while i < len(dumpDict[key]) :
+		locAnswerDict[key].append( \
+		    (dumpDict[key][0][0], dumpDict[key][0][1], dumpDict[key][0][2]))
+		i += 1
 
 	self.lastWasWrong = False
 	self.currentQ = []
@@ -239,25 +247,77 @@ class powersQuiz(cmd.Cmd) :
         global askAgainDelayList
         global answerDict
 
-        with open(saveStateFile, 'r') as f :
-            qQuiz = f.read()
-        dumpDict = yaml.safe_load(qQuiz)
-
-	locFullQuizList = dumpDict.pop("fullQuizList")
-	for q in locFullQuizList :
-	    if not (q in fullQuizList) :
-		fullQuizList.append(q)
-
-        quizList = dumpDict.pop("quizList")
-        askAgainQuickList = dumpDict.pop("askAgainQuickList")
-        askAgainDelayList = dumpDict.pop("askAgainDelayList")
-        answerDict = dumpDict
+	if self.currentQ != [] :
+	    quizList.append(self.currentQ)
 
 	self.lastWasWrong = False
 	self.currentQ = []
 	self.prompt = 'continue? '
 	self.quizState = ASK_CONTINUE
-	self.quickAsk = quickWaitCycles
+
+        with open(saveStateFile, 'r') as f :
+            qQuiz = f.read()
+        dumpDict = yaml.safe_load(qQuiz)
+
+        locFullQuizList = dumpDict.pop("fullQuizList")
+        locAskedItems = dumpDict.pop("askedItems")
+        locQuizList = dumpDict.pop("quizList")
+        locAskAgainQuickList = dumpDict.pop("askAgainQuickList")
+        locAskAgainDelayList = dumpDict.pop("askAgainDelayList")
+
+	for q in locAskedItems :
+	    if not (q in askedItems) :
+		askedItems.append(q)
+	askedItems.sort(key=itemgetter(POWER))
+
+	for q in fullQuizList :
+	    if q in askedItems :
+		fullQuizList.remvove(q)
+
+	for q in locFullQuizList :
+	    if not (q in fullQuizList or q in answerList) :
+		fullQuizList.append(q)
+
+	for q in locQuizList :
+	    if not (q in quizList) :
+		quizList.append(q)
+	i = 0
+	while i < len(quizList) :
+	    quizList[i][SHUFFLE] = random.random()
+	    i += 1
+	quizList.sort(key=itemgetter(SHUFFLE))
+
+	for q in locAskAgainQuickList :
+	    if not (q in askAgainQuickList) :
+		askAgainQuickList.append(q)
+	self.quickAsk = quickWaitCycles if len(askAgainQuickList) > 0 else -1
+
+	for q in locAskAgainDelayList :
+	    if not (q in askAgainDelayList) :
+		askAgainDelayList.append(q)
+
+	for key in dumpDict :
+            if answerDict.has_key(key) :
+		q = answerDict[key][0]
+		ansList = copy.deepcopy(answerDict[key])
+		ansList.pop(0)
+		print ansList
+		s1 = Set(ansList)
+
+		locAnsList = []
+		i = 1
+		while i < len(dumpDict[key]) :
+		    locAnsList.append( \
+			(dumpDict[key][i][0], dumpDict[key][i][1], dumpDict[key][i][2]))
+		    i += 1
+
+		print locAnsList
+		s2 = Set(locAnsList)
+		newAnsList = sorted(s1 | s2)
+		newAnsList.insert(0, q)
+                answerDict[key] = newAnsList
+            else :
+                answerDict[key] = dumpDict[key]
 
     def getNextQuestion(self) :
 
@@ -290,10 +350,10 @@ class powersQuiz(cmd.Cmd) :
 	elif self.quizState == GET_ANSWER :
 	    self.endTime = time.time()
             if answerDict.has_key(self.qStr) :
-                answerDict[self.qStr].append(((self.endTime - self.startTime), False))
+                answerDict[self.qStr].append((self.startTime, (self.endTime - self.startTime), False))
             else :
                 answerDict[self.qStr] = [[self.root, self.exponent, self.power, \
-		    0.0, self.askForRoot], ((self.endTime - self.startTime), False)]
+		    0.0, self.askForRoot], (self.startTime, (self.endTime - self.startTime), False)]
 	    if not self.lastWasWrong :
 		askAgainQuickList.append( \
 		    [self.root, self.exponent, self.power, \
@@ -335,11 +395,13 @@ class powersQuiz(cmd.Cmd) :
 
                 if answerDict.has_key(self.qStr) :
                     answerDict[self.qStr].append( \
-                        ((self.endTime - self.startTime), \
+			(self.startTime, \
+                        (self.endTime - self.startTime), \
 			(userAnswer == self.correctAnswer)))
                 else :
                     answerDict[self.qStr] = [[self.root, self.exponent, self.power, \
-                        0.0, self.askForRoot], ((self.endTime - self.startTime), \
+                        0.0, self.askForRoot], \
+			(self.startTime, (self.endTime - self.startTime), \
 			(userAnswer == self.correctAnswer))]
 
                 self.startTime = time.time()
