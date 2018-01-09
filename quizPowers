@@ -15,6 +15,7 @@ import yaml
 import copy
 from sets import Set
 
+# Constants - like enum type.
 ROOT = 0
 EXP = 1
 POWER = 2
@@ -30,25 +31,28 @@ GET_ANSWER = 1
 
 kEpsilon = 1.0e-12
 
-quickWaitCycles = 3
-delayWaitCycles = 7
+# Global prefs - can be adjusted once tested more
+# thoroughly for "playability".
+#
+kQuickWaitCycles = 3
+kDelayWaitCycles = 7
 
 # Make sure this is an even number
 #
-maxQListSize = 8
+kMaxQListSize = 8
 
 # Temporary filename for saving state
 #
-saveStateFile = "quizPowers.json"
+gSaveStateFile = "quizPowers.json"
 
 # Global vars
 #
-fullQuizList = []
-askedItems = []
-quizList = []
-askAgainQuickList = []
-askAgainDelayList = []
-answerDict = {}
+gFullQuizList = []
+gAskedItems = []
+gQuizList = []
+gAskAgainQuickList = []
+gAskAgainDelayList = []
+gAnswerDict = {}
 
 def stndNormDist(x) :
     return 1.0/math.sqrt(math.pow(math.e, x*x))
@@ -85,13 +89,13 @@ def getSlowestAnswers(n) :
         return []
 
     qList = []
-    for key in answerDict :
-        qList.append(copy.deepcopy(answerDict[key][0]))
+    for key in gAnswerDict :
+        qList.append(copy.deepcopy(gAnswerDict[key][0]))
         times = []
         i = 1
-        while i < len(answerDict[key]) :
-            if answerDict[key][i][WAS_CORRECT] :
-                times.append(answerDict[key][i][ANSWER_TIME])
+        while i < len(gAnswerDict[key]) :
+            if gAnswerDict[key][i][WAS_CORRECT] :
+                times.append(gAnswerDict[key][i][ANSWER_TIME])
             i += 1
         if times == [] :
             qList.pop()
@@ -106,8 +110,18 @@ def getSlowestAnswers(n) :
     return qList[:n]
 
 def printQuizList() :
-    global quizList
-    for q in quizList :
+    global gQuizList
+    for q in gQuizList :
+        print q
+
+def printFullQuizList() :
+    global gFullQuizList
+    for q in gFullQuizList :
+        print q
+
+def printAskedItems() :
+    global gAskedItems
+    for q in gAskedItems :
         print q
 
 class powersQuiz(cmd.Cmd) :
@@ -133,13 +147,13 @@ class powersQuiz(cmd.Cmd) :
         cmd.Cmd.__init__(self)
 
     def growQuizList(self) :
-	global askedItems
-	global quizList
+	global gAskedItems
+	global gQuizList
 
 	if self.quickAsk >= 0 :
-	    if self.quickAsk == 0 or len(quizList) == 0 :
-		quizList.append(askAgainQuickList.pop(0))
-		self.quickAsk = -1 if (len(askAgainQuickList) == 0) else quickWaitCycles
+	    if self.quickAsk == 0 or len(gQuizList) == 0 :
+		gQuizList.append(gAskAgainQuickList.pop(0))
+		self.quickAsk = -1 if (len(gAskAgainQuickList) == 0) else kQuickWaitCycles
 		return True
 
 	if self.quickAsk > 0 :
@@ -148,35 +162,35 @@ class powersQuiz(cmd.Cmd) :
 	# If there are powers in the full list that have not
 	# been asked yet draw questions from those.
 	#
-	if len(fullQuizList) > 0 :
+	if len(gFullQuizList) > 0 :
 
-	    if len(quizList) < maxQListSize/2 :
-		while len(quizList) < maxQListSize and len(fullQuizList) > 0 :
-		    r = fullQuizList[-1][ROOT]
-		    e = fullQuizList[-1][EXP]
-		    x = fullQuizList[-1][POWER]
-		    askedItems.append(fullQuizList.pop())
-		    quizList.append([r, e, x, 0.0, True])
-		    quizList.append([r, e, x, 0.0, False])
+	    if len(gQuizList) < kMaxQListSize/2 :
+		while len(gQuizList) < kMaxQListSize and len(gFullQuizList) > 0 :
+		    r = gFullQuizList[-1][ROOT]
+		    e = gFullQuizList[-1][EXP]
+		    x = gFullQuizList[-1][POWER]
+		    gAskedItems.append(gFullQuizList.pop())
+		    gQuizList.append([r, e, x, 0.0, True])
+		    gQuizList.append([r, e, x, 0.0, False])
 		i = 0
-		while i < len(quizList) :
-		    quizList[i][SHUFFLE] = random.random()
+		while i < len(gQuizList) :
+		    gQuizList[i][SHUFFLE] = random.random()
 		    i += 1
-		quizList.sort(key=itemgetter(SHUFFLE))
+		gQuizList.sort(key=itemgetter(SHUFFLE))
 		return True
 	    else :
 		return False
 	       
-	# Grows up to max size of quizList if quizList is empty
+	# Grows up to max size of gQuizList if gQuizList is empty
 	#
-	elif len(quizList) == 0 :
-	    quizList = getSlowestAnswers(maxQListSize)
+	elif len(gQuizList) == 0 :
+	    gQuizList = getSlowestAnswers(kMaxQListSize)
 	    i = 0
-	    while i < len(quizList) :
-		quizList[i][SHUFFLE] = random.random()
+	    while i < len(gQuizList) :
+		gQuizList[i][SHUFFLE] = random.random()
 		i += 1
-	    quizList.sort(key=itemgetter(SHUFFLE))
-	    return len(quizList) > 0
+	    gQuizList.sort(key=itemgetter(SHUFFLE))
+	    return len(gQuizList) > 0
 
 	else :
 	    return False
@@ -188,42 +202,42 @@ class powersQuiz(cmd.Cmd) :
     def writeState(self) :
 
 	if self.currentQ != [] :
-	    quizList.append(self.currentQ)
+	    gQuizList.append(self.currentQ)
 
 	self.lastWasWrong = False
 	self.currentQ = []
 	self.prompt = 'continue? '
 	self.quizState = ASK_CONTINUE
 
-        dumpDict = copy.deepcopy(answerDict)
-        dumpDict["fullQuizList"] = fullQuizList
-        dumpDict["askedItems"] = askedItems
-        dumpDict["quizList"] = quizList
-        dumpDict["askAgainQuickList"] = askAgainQuickList
-        dumpDict["askAgainDelayList"] = askAgainDelayList
+        dumpDict = copy.deepcopy(gAnswerDict)
+        dumpDict["gFullQuizList"] = gFullQuizList
+        dumpDict["gAskedItems"] = gAskedItems
+        dumpDict["gQuizList"] = gQuizList
+        dumpDict["gAskAgainQuickList"] = gAskAgainQuickList
+        dumpDict["gAskAgainDelayList"] = gAskAgainDelayList
         
         jQuiz = json.dumps(dumpDict, ensure_ascii=False, sort_keys=True, indent=2, separators=(',',': '))
-        with open(saveStateFile, 'w') as f :
+        with open(gSaveStateFile, 'w') as f :
             f.write(jQuiz)
 
     def readState(self) :
-        global fullQuizList
-        global askedItems
-        global quizList
-        global askAgainQuickList
-        global askAgainDelayList
-        global answerDict
+        global gFullQuizList
+        global gAskedItems
+        global gQuizList
+        global gAskAgainQuickList
+        global gAskAgainDelayList
+        global gAnswerDict
 
-        with open(saveStateFile, 'r') as f :
+        with open(gSaveStateFile, 'r') as f :
             qQuiz = f.read()
 
         dumpDict = yaml.safe_load(qQuiz)
 
-        fullQuizList = dumpDict.pop("fullQuizList")
-        askedItems = dumpDict.pop("askedItems")
-        quizList = dumpDict.pop("quizList")
-        askAgainQuickList = dumpDict.pop("askAgainQuickList")
-        askAgainDelayList = dumpDict.pop("askAgainDelayList")
+        gFullQuizList = dumpDict.pop("gFullQuizList")
+        gAskedItems = dumpDict.pop("gAskedItems")
+        gQuizList = dumpDict.pop("gQuizList")
+        gAskAgainQuickList = dumpDict.pop("gAskAgainQuickList")
+        gAskAgainDelayList = dumpDict.pop("gAskAgainDelayList")
 	locAnswerDict = {}
 	for key in dumpDict :
 	    locAnswerDict[key] = [dumpDict[key][0]]
@@ -232,76 +246,76 @@ class powersQuiz(cmd.Cmd) :
 		locAnswerDict[key].append( \
 		    (dumpDict[key][i][0], dumpDict[key][i][1], dumpDict[key][i][2]))
 		i += 1
-	answerDict = locAnswerDict
+	gAnswerDict = locAnswerDict
 
 	self.lastWasWrong = False
 	self.currentQ = []
 	self.prompt = 'continue? '
 	self.quizState = ASK_CONTINUE
-        if askAgainQuickList != [] :
-            self.quickAsk = quickWaitCycles
+        if gAskAgainQuickList != [] :
+            self.quickAsk = kQuickWaitCycles
 
     def mergeState(self) :
-        global fullQuizList
-        global askedItems
-        global quizList
-        global askAgainQuickList
-        global askAgainDelayList
-        global answerDict
+        global gFullQuizList
+        global gAskedItems
+        global gQuizList
+        global gAskAgainQuickList
+        global gAskAgainDelayList
+        global gAnswerDict
 
 	if self.currentQ != [] :
-	    quizList.append(self.currentQ)
+	    gQuizList.append(self.currentQ)
 
 	self.lastWasWrong = False
 	self.currentQ = []
 	self.prompt = 'continue? '
 	self.quizState = ASK_CONTINUE
 
-        with open(saveStateFile, 'r') as f :
+        with open(gSaveStateFile, 'r') as f :
             qQuiz = f.read()
         dumpDict = yaml.safe_load(qQuiz)
 
-        locFullQuizList = dumpDict.pop("fullQuizList")
-        locAskedItems = dumpDict.pop("askedItems")
-        locQuizList = dumpDict.pop("quizList")
-        locAskAgainQuickList = dumpDict.pop("askAgainQuickList")
-        locAskAgainDelayList = dumpDict.pop("askAgainDelayList")
+        locFullQuizList = dumpDict.pop("gFullQuizList")
+        locAskedItems = dumpDict.pop("gAskedItems")
+        locQuizList = dumpDict.pop("gQuizList")
+        locAskAgainQuickList = dumpDict.pop("gAskAgainQuickList")
+        locAskAgainDelayList = dumpDict.pop("gAskAgainDelayList")
 
 	for q in locAskedItems :
-	    if not (q in askedItems) :
-		askedItems.append(q)
-	askedItems.sort(key=itemgetter(POWER))
+	    if not (q in gAskedItems) :
+		gAskedItems.append(q)
+	gAskedItems.sort(key=itemgetter(POWER))
 
-	for q in fullQuizList :
-	    if q in askedItems :
-		fullQuizList.remvove(q)
+	for q in gFullQuizList :
+	    if q in gAskedItems :
+		gFullQuizList.remvove(q)
 
 	for q in locFullQuizList :
-	    if not (q in fullQuizList or q in askedItems) :
-		fullQuizList.append(q)
+	    if not (q in gFullQuizList or q in gAskedItems) :
+		gFullQuizList.append(q)
 
 	for q in locQuizList :
-	    if not (q in quizList) :
-		quizList.append(q)
+	    if not (q in gQuizList) :
+		gQuizList.append(q)
 	i = 0
-	while i < len(quizList) :
-	    quizList[i][SHUFFLE] = random.random()
+	while i < len(gQuizList) :
+	    gQuizList[i][SHUFFLE] = random.random()
 	    i += 1
-	quizList.sort(key=itemgetter(SHUFFLE))
+	gQuizList.sort(key=itemgetter(SHUFFLE))
 
 	for q in locAskAgainQuickList :
-	    if not (q in askAgainQuickList) :
-		askAgainQuickList.append(q)
-	self.quickAsk = quickWaitCycles if len(askAgainQuickList) > 0 else -1
+	    if not (q in gAskAgainQuickList) :
+		gAskAgainQuickList.append(q)
+	self.quickAsk = kQuickWaitCycles if len(gAskAgainQuickList) > 0 else -1
 
 	for q in locAskAgainDelayList :
-	    if not (q in askAgainDelayList) :
-		askAgainDelayList.append(q)
+	    if not (q in gAskAgainDelayList) :
+		gAskAgainDelayList.append(q)
 
 	for key in dumpDict :
-            if answerDict.has_key(key) :
-		q = answerDict[key][0]
-		ansList = copy.deepcopy(answerDict[key])
+            if gAnswerDict.has_key(key) :
+		q = gAnswerDict[key][0]
+		ansList = copy.deepcopy(gAnswerDict[key])
 		ansList.pop(0)
 		s1 = Set(ansList)
 
@@ -315,18 +329,18 @@ class powersQuiz(cmd.Cmd) :
 		s2 = Set(locAnsList)
 		newAnsList = sorted(s1 | s2)
 		newAnsList.insert(0, q)
-                answerDict[key] = newAnsList
+                gAnswerDict[key] = newAnsList
             else :
-                answerDict[key] = dumpDict[key]
+                gAnswerDict[key] = dumpDict[key]
 
     def getNextQuestion(self) :
 
 	self.growQuizList()
-	self.root       = quizList[-1][ROOT]
-	self.exponent   = quizList[-1][EXP]
-	self.power      = quizList[-1][POWER]
-	self.askForRoot = quizList[-1][ASK_FOR_ROOT]
-	self.currentQ = quizList.pop()
+	self.root       = gQuizList[-1][ROOT]
+	self.exponent   = gQuizList[-1][EXP]
+	self.power      = gQuizList[-1][POWER]
+	self.askForRoot = gQuizList[-1][ASK_FOR_ROOT]
+	self.currentQ = gQuizList.pop()
 
 	if self.askForRoot :
 	    self.correctAnswer = self.root
@@ -342,25 +356,25 @@ class powersQuiz(cmd.Cmd) :
         return True
 
     def emptyline(self):
-        global answerDict
+        global gAnswerDict
 	if self.quizState == ASK_CONTINUE :
 	    self.getNextQuestion()
 	    self.startTime = time.time()
 
 	elif self.quizState == GET_ANSWER :
 	    self.endTime = time.time()
-            if answerDict.has_key(self.qStr) :
-                answerDict[self.qStr].append((self.startTime, (self.endTime - self.startTime), False))
+            if gAnswerDict.has_key(self.qStr) :
+                gAnswerDict[self.qStr].append((self.startTime, (self.endTime - self.startTime), False))
             else :
-                answerDict[self.qStr] = [[self.root, self.exponent, self.power, \
+                gAnswerDict[self.qStr] = [[self.root, self.exponent, self.power, \
 		    0.0, self.askForRoot], (self.startTime, (self.endTime - self.startTime), False)]
 	    if not self.lastWasWrong :
-		askAgainQuickList.append( \
+		gAskAgainQuickList.append( \
 		    [self.root, self.exponent, self.power, \
 		    0.0, self.askForRoot])
 	    print "--- " + self.qStr + " is " + str(self.correctAnswer) + " ---"
 	    if self.quickAsk < 0 :
-		self.quickAsk = quickWaitCycles
+		self.quickAsk = kQuickWaitCycles
 	    self.lastWasWrong = False
 	    self.currentQ = []
 	    self.prompt = 'continue? '
@@ -368,7 +382,7 @@ class powersQuiz(cmd.Cmd) :
     
     def default(self, line):
         userAnswer = 0
-        global answerDict
+        global gAnswerDict
 	if self.quizState == GET_ANSWER :
 	    self.endTime = time.time()
 	    try :
@@ -387,20 +401,20 @@ class powersQuiz(cmd.Cmd) :
 		else :
 		    print "Incorrect"
 		    if not self.lastWasWrong :
-			askAgainQuickList.append( \
+			gAskAgainQuickList.append( \
 			    [self.root, self.exponent, self.power, \
 			    0.0, self.askForRoot])
 			self.lastWasWrong = True
 			if self.quickAsk < 0 :
-			    self.quickAsk = quickWaitCycles
+			    self.quickAsk = kQuickWaitCycles
 
-                if answerDict.has_key(self.qStr) :
-                    answerDict[self.qStr].append( \
+                if gAnswerDict.has_key(self.qStr) :
+                    gAnswerDict[self.qStr].append( \
 			(self.startTime, \
                         (self.endTime - self.startTime), \
 			(userAnswer == self.correctAnswer)))
                 else :
-                    answerDict[self.qStr] = [[self.root, self.exponent, self.power, \
+                    gAnswerDict[self.qStr] = [[self.root, self.exponent, self.power, \
                         0.0, self.askForRoot], \
 			(self.startTime, (self.endTime - self.startTime), \
 			(userAnswer == self.correctAnswer))]
@@ -415,24 +429,35 @@ class powersQuiz(cmd.Cmd) :
     def postcmd(self, stop, line):
         '''
 	print '***postcmd***'
-        print "answerDict..."
-        for key in answerDict :
+        print "gAnswerDict..."
+        for key in gAnswerDict :
             print key
-            print answerDict[key]
-        print "quizList..."
+            print gAnswerDict[key]
+        print "gQuizList..."
         printQuizList()
+        print "gFullQuizList..."
+        printFullQuizList()
+        print "gAskedItems..."
+        printAskedItems()
         '''
 	print ''
 	return cmd.Cmd.postcmd(self, stop, line)
     
     def do_repeat(self, line) :
-        fullQuizList = askedItems
-        fullQuizList.reverse
+        gFullQuizList = gAskedItems
+        gFullQuizList.reverse
+        # '''
+	print '***repeat***'
+        print "gFullQuizList..."
+        printFullQuizList()
+        print "gAskedItems..."
+        printAskedItems()
+        # '''
     
     def do_stats(self, line) :
-        for key in answerDict :
+        for key in gAnswerDict :
             print key
-            print answerDict[key]
+            print gAnswerDict[key]
 
     def do_write(self, line) :
         self.writeState()
@@ -537,10 +562,10 @@ def main():
             x = pow(r, e)
 	    if args.maxDigits > 0.0 and math.log(x, 10) > args.maxDigits - kEpsilon :
 		continue
-            fullQuizList.append((r, e, x))
-    fullQuizList.sort(key=itemgetter(POWER))
-    fullQuizList.reverse()
-    ### print fullQuizList
+            gFullQuizList.append((r, e, x))
+    gFullQuizList.sort(key=itemgetter(POWER))
+    gFullQuizList.reverse()
+    ### print gFullQuizList
 
     random.seed()
 
