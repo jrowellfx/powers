@@ -1,28 +1,28 @@
 #!/usr/bin/python2.7
 
 # BSD 3-Clause License
-# 
+#
 # Copyright (c) 2008-2020, James Philip Rowell,
 # Alpha Eleven Incorporated
 # www.alpha-eleven.com
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-# 
+#
 #   - Redistributions of source code must retain the above copyright
 #     notice, this list of conditions and the following disclaimer.
-# 
+#
 #   - Redistributions in binary form must reproduce the above copyright
 #     notice, this list of conditions and the following disclaimer in
 #     the documentation and/or other materials provided with the
 #     distribution.
-# 
+#
 #   - Neither the name of "Alpha Eleven, Inc."  nor the names of its
 #     contributors may be used to endorse or promote products derived
 #     from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -67,16 +67,16 @@ def main():
     p.add_argument("--version", action="version", version="1.001")
     p.add_argument("--maxExponent", "-n", action="store", type=int, dest="n",
         default=4, metavar="N",
-	help="The highest exponent in the table will be N (default=4).")
+        help="The highest exponent in the table will be N (default=4).")
     p.add_argument("--maxRoot", "-m", action="store", type=int, dest="m",
         default=13, metavar="M",
-	help="Print the powers of integers from 2 to M (default=13).")
+        help="Print the powers of integers from 2 to M (default=13).")
     p.add_argument("--primes", action="store_true",
         dest="onlyPrimes", default=False,
         help="only print out powers of primes" )
     p.add_argument("--limit", action="store", type=float, dest="maxDigits",
         default=-1.0, metavar="MAX",
-	help="Limit printing powers to numbers of length MAX-digits or less")
+        help="Limit printing powers to numbers of length MAX-digits or less")
 
     args = p.parse_args()
 
@@ -95,7 +95,7 @@ def main():
             ": warning: max digits is 0, nothing to print."
         sys.exit(0)
 
-    # Note: this "isPrime" array will be filled with True 
+    # Note: this "isPrime" array will be filled with True
     # in the case that we want to display ALL the integers
     # from 2,m - sorry, it's a bit of a cheat to use this list
     # this way, but it makes for clean code.
@@ -104,100 +104,100 @@ def main():
 
     # Sieve of Eratosthenes - skipped when wanting to list ALL numbers
     #
-    if args.onlyPrimes : 
-	p = 2
-	while p < (args.m / 2) :
-	    i = 2
-	    while p*i <= args.m :
-		isPrime[p*i] = False
-		i += 1
-	    p += 1
-	    while not isPrime[p] :
-		p += 1
+    if args.onlyPrimes :
+        p = 2
+        while p < (args.m / 2) :
+            i = 2
+            while p*i <= args.m :
+                isPrime[p*i] = False
+                i += 1
+            p += 1
+            while not isPrime[p] :
+                p += 1
 
     # Find the largest prime in table
     #
     if not args.onlyPrimes :
-	maxM = args.m
+        maxM = args.m
     else :
-	i = len(isPrime) - 1
-	while not isPrime[i] : 
-	    i -= 1
-	maxM = i
+        i = len(isPrime) - 1
+        while not isPrime[i] :
+            i -= 1
+        maxM = i
     maxN = args.n
 
     if args.maxDigits > 0 :
 
-	# Calculate the highest exponent to be printed out
-	# (for formatting purposes)
-	#
-	n = 2
-	while n <= maxN :
-	    if math.log(pow(2, n), 10) > args.maxDigits - kEpsilon :
-		n -= 1
-		break
-	    n += 1
-	#
-	if n < maxN :
-	    maxN = n
+        # Calculate the highest exponent to be printed out
+        # (for formatting purposes)
+        #
+        n = 2
+        while n <= maxN :
+            if math.log(pow(2, n), 10) > args.maxDigits - kEpsilon :
+                n -= 1
+                break
+            n += 1
+        #
+        if n < maxN :
+            maxN = n
 
-	# Calculate the highest root to be printed out
-	# (for formatting purposes)
-	#
-	m = 2
-	while m <= maxM :
-	    if math.log(pow(m, 2), 10) > args.maxDigits - kEpsilon :
-		m -= 1
-		break
-	    m += 1
-	#
-	if m < maxM :
-	    maxM = m
-	while not isPrime[maxM] :
-	    maxM -= 1
+        # Calculate the highest root to be printed out
+        # (for formatting purposes)
+        #
+        m = 2
+        while m <= maxM :
+            if math.log(pow(m, 2), 10) > args.maxDigits - kEpsilon :
+                m -= 1
+                break
+            m += 1
+        #
+        if m < maxM :
+            maxM = m
+        while not isPrime[maxM] :
+            maxM -= 1
 
     outputLine = ""
     formatList = [0]
     commaFormat = "{:>,d}"
     commaFormatMaxLen = 0
     if args.maxDigits > 0 :
-	commaFormatMaxLen \
-	    = len(commaFormat.format(int("9"*int(math.ceil(args.maxDigits)))))
+        commaFormatMaxLen \
+            = len(commaFormat.format(int("9"*int(math.ceil(args.maxDigits)))))
     n = 1
     while n <= maxN :
-	if args.maxDigits > 0 :
-	    #
-	    # Need to calculate the actual length of the highest
-	    # nth power of the integer 'm' that also satisfies the constraint
-	    # of 'maxDigits' and possibly taking into account whether it's prime.
-	    # 
-	    m = 2
-	    while m <= maxM :
-		x = pow(m, n)
-		if math.log(x, 10) > args.maxDigits - kEpsilon :
-		    m -= 1
-		    break
-		m += 1
-	    m = m if (m <= maxM) else maxM
-	    while not isPrime[m] :
-		m -= 1
-	    x = pow(m, n)
-	    xWithCommas = commaFormat.format(x)
-	    formatList.append(len(xWithCommas))
+        if args.maxDigits > 0 :
+            #
+            # Need to calculate the actual length of the highest
+            # nth power of the integer 'm' that also satisfies the constraint
+            # of 'maxDigits' and possibly taking into account whether it's prime.
+            #
+            m = 2
+            while m <= maxM :
+                x = pow(m, n)
+                if math.log(x, 10) > args.maxDigits - kEpsilon :
+                    m -= 1
+                    break
+                m += 1
+            m = m if (m <= maxM) else maxM
+            while not isPrime[m] :
+                m -= 1
+            x = pow(m, n)
+            xWithCommas = commaFormat.format(x)
+            formatList.append(len(xWithCommas))
 
-	else :
-	    x = pow(maxM, n)
-	    xWithCommas = commaFormat.format(x)
-	    formatList.append(len(xWithCommas))
+        else :
+            x = pow(maxM, n)
+            xWithCommas = commaFormat.format(x)
+            formatList.append(len(xWithCommas))
 
-	commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
-	outputLine += commaFormatPad.format(n)
-	if n == 1 :
-	    outputLine = outputLine.replace("1", " ")
-	    outputLine += " | "
-	else :
-	    outputLine += "  "
-	n += 1
+        commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
+        outputLine += commaFormatPad.format(n)
+        if n == 1 :
+            outputLine = outputLine.replace("1", " ")
+            outputLine += " | "
+        else :
+            outputLine += "  "
+        n += 1
 
     # Make the dividing line between list of exponents
     # and first row of powers of 2.
@@ -216,23 +216,23 @@ def main():
     #
     m = 2
     while m <= maxM :
-	commaFormatPad = "{:>"+ str(formatList[1]) + ",d}"
-	outputLine = commaFormatPad.format(m) + " | "
+        commaFormatPad = "{:>"+ str(formatList[1]) + ",d}"
+        outputLine = commaFormatPad.format(m) + " | "
         n = 2
-	if isPrime[m] :
-	    while n <= maxN :
-		x = pow(m, n)
-		commaFormatPad = "{:>"+ str(formatList[n]) + ",d}"
-		if args.maxDigits > 0 :
-		    if math.log(x, 10) <= args.maxDigits - kEpsilon :
-			outputLine += commaFormatPad.format(x) + "  "
-		    else :
-			break
-		else :
-		    outputLine += commaFormatPad.format(x) + "  "
-		n += 1
-	    print outputLine
+        if isPrime[m] :
+            while n <= maxN :
+                x = pow(m, n)
+                commaFormatPad = "{:>"+ str(formatList[n]) + ",d}"
+                if args.maxDigits > 0 :
+                    if math.log(x, 10) <= args.maxDigits - kEpsilon :
+                        outputLine += commaFormatPad.format(x) + "  "
+                    else :
+                        break
+                else :
+                    outputLine += commaFormatPad.format(x) + "  "
+                n += 1
+            print outputLine
         m += 1
-        
+
 if __name__ == '__main__':
     main()
