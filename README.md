@@ -1,8 +1,7 @@
 # powers and quizPowers
 
 Powers prints out a table of powers
-for the integers 2,m with exponents 2,n
-- see how many you can memorize!
+for the integers 2,m with exponents 2,n - see how many you can memorize!
 
 According to the introduction in Leonard Euler's "Elements of Algebra"
 (ISBN-13: 978-1508901181), Euler had the powers up to six memorized for all numbers from 1, 100.
