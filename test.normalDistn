@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 
 import sys
 import json
@@ -42,31 +42,31 @@ def main():
             pass
     sys.excepthook = new_hook
 
-    print genWeights(0)
-    print genWeights(1)
-    print genWeights(2)
-    print genWeights(4)
-    print genWeights(8)
-    print genWeights(13)
-    print genWeights(19)
+    print(genWeights(0))
+    print(genWeights(1))
+    print(genWeights(2))
+    print(genWeights(4))
+    print(genWeights(8))
+    print(genWeights(13))
+    print(genWeights(19))
         
-    print math.fsum(genWeights(0))
-    print math.fsum(genWeights(1))
-    print math.fsum(genWeights(2))
-    print math.fsum(genWeights(4))
-    print math.fsum(genWeights(8))
-    print math.fsum(genWeights(13))
-    print math.fsum(genWeights(19))
+    print(math.fsum(genWeights(0)))
+    print(math.fsum(genWeights(1)))
+    print(math.fsum(genWeights(2)))
+    print(math.fsum(genWeights(4)))
+    print(math.fsum(genWeights(8)))
+    print(math.fsum(genWeights(13)))
+    print(math.fsum(genWeights(19)))
 
-    print weightedAvg([2.5])
-    print weightedAvg([2.5, 2.8])
-    print weightedAvg([2.5, 2.8, 3.0])
-    print weightedAvg([2.5, 2.8, 3.0, 8.0])
-    print weightedAvg([2.5, 2.8, 3.0, 8.0, 22])
-    print weightedAvg([2.5, 2.5, 2.8, 3.0, 8.0, 22])
-    print weightedAvg([2.5, 2.5, 2.5, 2.8, 3.0, 8.0, 22])
-    print weightedAvg([2.5, 2.5, 2.5, 2.5, 2.8, 3.0, 8.0, 22])
-    print weightedAvg([2.5, 2.5, 2.5, 2.5, 2.5, 2.8, 3.0, 8.0, 22])
+    print(weightedAvg([2.5]))
+    print(weightedAvg([2.5, 2.8]))
+    print(weightedAvg([2.5, 2.8, 3.0]))
+    print(weightedAvg([2.5, 2.8, 3.0, 8.0]))
+    print(weightedAvg([2.5, 2.8, 3.0, 8.0, 22]))
+    print(weightedAvg([2.5, 2.5, 2.8, 3.0, 8.0, 22]))
+    print(weightedAvg([2.5, 2.5, 2.5, 2.8, 3.0, 8.0, 22]))
+    print(weightedAvg([2.5, 2.5, 2.5, 2.5, 2.8, 3.0, 8.0, 22]))
+    print(weightedAvg([2.5, 2.5, 2.5, 2.5, 2.5, 2.8, 3.0, 8.0, 22]))
 
         
 if __name__ == '__main__':

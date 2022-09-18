@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 
 # 3-Clause BSD License
 # 
@@ -49,7 +49,6 @@ import cmd
 import json
 import yaml
 import copy
-from sets import Set
 
 # Constants - like enum type.
 ROOT = 0
@@ -148,17 +147,17 @@ def getSlowestAnswers(n) :
 def printQuizList() :
     global gQuizList
     for q in gQuizList :
-        print q
+        print(q)
 
 def printFullQuizList() :
     global gFullQuizList
     for q in gFullQuizList :
-        print q
+        print(q)
 
 def printAskedItems() :
     global gAskedItems
     for q in gAskedItems :
-        print q
+        print(q)
 
 class powersQuiz(cmd.Cmd) :
     'quiz user on powers of integers'
@@ -349,7 +348,7 @@ class powersQuiz(cmd.Cmd) :
                 gAskAgainDelayList.append(q)
 
         for key in dumpDict :
-            if gAnswerDict.has_key(key) :
+            if key in gAnswerDict :
                 q = gAnswerDict[key][0]
                 ansList = copy.deepcopy(gAnswerDict[key])
                 ansList.pop(0)
@@ -399,7 +398,7 @@ class powersQuiz(cmd.Cmd) :
 
         elif self.quizState == GET_ANSWER :
             self.endTime = time.time()
-            if gAnswerDict.has_key(self.qStr) :
+            if self.qStr in gAnswerDict :
                 gAnswerDict[self.qStr].append((self.startTime, (self.endTime - self.startTime), False))
             else :
                 gAnswerDict[self.qStr] = [[self.root, self.exponent, self.power, \
@@ -408,7 +407,7 @@ class powersQuiz(cmd.Cmd) :
                 gAskAgainQuickList.append( \
                     [self.root, self.exponent, self.power, \
                     0.0, self.askForRoot])
-            print "--- " + self.qStr + " is " + str(self.correctAnswer) + " ---"
+            print("--- " + self.qStr + " is " + str(self.correctAnswer) + " ---")
             if self.quickAsk < 0 :
                 self.quickAsk = kQuickWaitCycles
             self.lastWasWrong = False
@@ -424,18 +423,18 @@ class powersQuiz(cmd.Cmd) :
             try :
                 userAnswer = int(line)
             except ValueError :
-                print "Value typed was not an integer"
+                print("Value typed was not an integer")
                 self.startTime = time.time()
             else :
                 if userAnswer == self.correctAnswer :
-                    print "Correct"
+                    print("Correct")
                     self.prompt = 'continue? '
                     self.quizState = ASK_CONTINUE
                     self.currentQ = []
                     self.lastWasWrong = False
 
                 else :
-                    print "Incorrect"
+                    print("Incorrect")
                     if not self.lastWasWrong :
                         gAskAgainQuickList.append( \
                             [self.root, self.exponent, self.power, \
@@ -444,7 +443,7 @@ class powersQuiz(cmd.Cmd) :
                         if self.quickAsk < 0 :
                             self.quickAsk = kQuickWaitCycles
 
-                if gAnswerDict.has_key(self.qStr) :
+                if self.qStr in gAnswerDict :
                     gAnswerDict[self.qStr].append( \
                         (self.startTime, \
                         (self.endTime - self.startTime), \
@@ -457,7 +456,7 @@ class powersQuiz(cmd.Cmd) :
 
                 self.startTime = time.time()
         else :
-            print "Unknown command. Try 'help'"
+            print("Unknown command. Try 'help'")
 
     def precmd(self, line):
         return cmd.Cmd.precmd(self, line)
@@ -476,24 +475,24 @@ class powersQuiz(cmd.Cmd) :
         print "gAskedItems..."
         printAskedItems()
         '''
-        print ''
+        print('')
         return cmd.Cmd.postcmd(self, stop, line)
 
     def do_repeat(self, line) :
         gFullQuizList = gAskedItems
         gFullQuizList.reverse
         # '''
-        print '***repeat***'
-        print "gFullQuizList..."
+        print('***repeat***')
+        print("gFullQuizList...")
         printFullQuizList()
-        print "gAskedItems..."
+        print("gAskedItems...")
         printAskedItems()
         # '''
 
     def do_stats(self, line) :
         for key in gAnswerDict :
-            print key
-            print gAnswerDict[key]
+            print(key)
+            print(gAnswerDict[key])
 
     def do_write(self, line) :
         self.writeState()
@@ -528,7 +527,7 @@ def main():
             '''),
         usage="%(prog)s [OPTION]...")
 
-    p.add_argument("--version", action="version", version="0.100")
+    p.add_argument("--version", action="version", version="0.101")
     p.add_argument("--power", "-n", action="store", type=int, dest="n",
         default=2, nargs='+',
         help="List powers to test user on, eg. squares are 2, cubes 3 etc. (default=2).")
@@ -554,18 +553,18 @@ def main():
 
     for i in powerList :
         if i < 2 :
-            print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-                ": error: --power must be greater than or equal to two."
+            print(os.path.basename(sys.argv[0]) + \
+                ": error: --power must be greater than or equal to two.", file=sys.stderr)
             sys.exit(1)
 
     if args.m < 2 :
-        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": error: the range (--max) must be greater than or equal to two."
+        print(os.path.basename(sys.argv[0]) + \
+            ": error: the range (--max) must be greater than or equal to two.", file=sys.stderr)
         sys.exit(1)
 
     if args.maxDigits == 0 :
-        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": warning: max digits is 0, nothing to print."
+        print(os.path.basename(sys.argv[0]) + \
+            ": warning: max digits is 0, nothing to print.", file=sys.stderr)
         sys.exit(0)
 
     # Note: this "isPrime" array will be filled with True
@@ -601,7 +600,7 @@ def main():
             gFullQuizList.append((r, e, x))
     gFullQuizList.sort(key=itemgetter(POWER))
     gFullQuizList.reverse()
-    ### print gFullQuizList
+    ### print(gFullQuizList)
 
     random.seed()
 

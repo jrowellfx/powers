@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 
 import sys
 import json
@@ -22,31 +22,31 @@ def main():
     testDict['b'] = [2, 3.0, 4]
     testDict['c'] = [4, 6.0, 8]
 
-    print ""
-    print "testDict"
-    print type(testDict)
-    print testDict
+    print("")
+    print("testDict")
+    print(type(testDict))
+    print(testDict)
 
     jTest = json.dumps(testDict, ensure_ascii=False)
-    print "json data"
-    print type(jTest)
-    print jTest
+    print("json data")
+    print(type(jTest))
+    print(jTest)
 
     # a_loadedDict = yaml.safe_load(f)
 
     with open('testout.json', 'w') as f :
         json.dump(jTest, f)
 
-    print "about to open file and json.load it"
+    print("about to open file and json.load it")
     with open('testout.json', 'r') as f :
         data = json.load(f)
-    print "After reading file"
-    print type(data)
-    print data
+    print("After reading file")
+    print(type(data))
+    print(data)
 
     a_loadedDict = yaml.safe_load(data)
-    print type(a_loadedDict)
-    print a_loadedDict
+    print(type(a_loadedDict))
+    print(a_loadedDict)
         
 if __name__ == '__main__':
     main()

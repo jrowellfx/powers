@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 
 # 3-Clause BSD License
 # 
@@ -40,9 +40,9 @@ import sys
 
 n = int(sys.argv[1])
 result = []
-for i in xrange(2,n):
+for i in range(2,n):
     while n % i == 0:
-        # print i,"|",n
+        # print(i,"|",n)
         n = n/i
         result.append(i)
 
@@ -52,5 +52,5 @@ for i in xrange(2,n):
 if n > 1:
     result.append(n)
 
-print result
+print(result)
 

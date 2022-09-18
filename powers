@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 
 # 3-Clause BSD License
 # 
@@ -65,7 +65,7 @@ def main():
             '''),
         usage="%(prog)s [OPTION]...")
 
-    p.add_argument("--version", action="version", version="1.001")
+    p.add_argument("--version", action="version", version="1.002")
     p.add_argument("--maxExponent", "-n", action="store", type=int, dest="n",
         default=4, metavar="N",
         help="The highest exponent in the table will be N (default=4).")
@@ -82,18 +82,18 @@ def main():
     args = p.parse_args()
 
     if args.n < 2 :
-        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": error: the maximum exponent (--maxExponent) must be greater than one."
+        print(os.path.basename(sys.argv[0]) + \
+            ": error: the maximum exponent (--maxExponent) must be greater than one.", file=sys.stderr)
         sys.exit(1)
 
     if args.m < 2 :
-        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": error: the maximum integer in the range (--maxRoot) must be greater than one."
+        print(os.path.basename(sys.argv[0]) + \
+            ": error: the maximum integer in the range (--maxRoot) must be greater than one.", file=sys.stderr)
         sys.exit(1)
 
     if args.maxDigits == 0.0 :
-        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": warning: max digits is 0, nothing to print."
+        print(os.path.basename(sys.argv[0]) + \
+            ": warning: max digits is 0, nothing to print.", file=sys.stderr)
         sys.exit(0)
 
     # Note: this "isPrime" array will be filled with True
@@ -210,8 +210,8 @@ def main():
     # Print the exponents to be displayed on first row
     # then the dividing line.
     #
-    print outputLine
-    print "".join(s)
+    print(outputLine)
+    print("".join(s))
 
     # Now calculate and print the powers
     #
@@ -232,7 +232,7 @@ def main():
                 else :
                     outputLine += commaFormatPad.format(x) + "  "
                 n += 1
-            print outputLine
+            print(outputLine)
         m += 1
 
 if __name__ == '__main__':
