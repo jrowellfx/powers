@@ -523,7 +523,8 @@ def main():
     p = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent('''\
-            Quiz the user's memory on squares and cubes, 4th powers etc.
+            Quiz the user's memory on squares and cubes, 4th powers,
+            5th, ..., plus corresponding roots.
             '''),
         usage="%(prog)s [OPTION]...")
 
